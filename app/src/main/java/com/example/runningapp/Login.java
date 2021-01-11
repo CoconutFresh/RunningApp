@@ -39,6 +39,7 @@ public class Login extends AppCompatActivity {
             //Switches over control of the app to the next activity
             Intent intent = new Intent(Login.this, HomePage.class);
             startActivity(intent);
+            finish(); //Makes it so that the user can't use the back button to return to this page.
         }
     }
 }
