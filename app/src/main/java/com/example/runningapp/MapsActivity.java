@@ -1,7 +1,11 @@
 package com.example.runningapp;
 
+import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentActivity;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Looper;
 import android.util.Log;
@@ -15,8 +19,11 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
     private GoogleMap mMap;
@@ -37,16 +44,33 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
 
 
-        // Default if location is not set on
+        /*// Default if location is not set on
         LatLng manila = new LatLng(15, 121);
         mMap.addMarker(new MarkerOptions().position(manila).title("Marker in Manila"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(manila));
-        requestLocation(mMap);
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(manila));*/
+        startRun();
     }
 
-    private void requestLocation(GoogleMap googleMap) {
+    private void startRun() {
+
+        //TODO: Make Polyline look nicer
+        //Creates settings for the runner's polyline route
+        PolylineOptions runRouteSettings = new PolylineOptions();
+        runRouteSettings.clickable(false).color(Color.CYAN);
+
+        Polyline runRoute = mMap.addPolyline(runRouteSettings);
+
+        /*//Testing Polyline
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(15, 121)));
+        mMap.animateCamera(CameraUpdateFactory.zoomTo(20));*/
+
+        requestLocation(runRoute, runRouteSettings);
+    }
+
+    private void requestLocation(Polyline runRoute, PolylineOptions runRouteTrack) {
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         locationCallback = new LocationCallback() {
             @Override
@@ -56,14 +80,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         + "Lng is: " + locationResult.getLastLocation().getLongitude());
 
                 LatLng curLoc = new LatLng(locationResult.getLastLocation().getLatitude(), locationResult.getLastLocation().getLongitude());
-                mMap.addMarker(new MarkerOptions().position(curLoc).title("Marker for curLoc"));
+                runRouteTrack.add(curLoc);
+                Polyline runRoute = mMap.addPolyline(runRouteTrack);
                 mMap.moveCamera(CameraUpdateFactory.newLatLng(curLoc));
+                mMap.animateCamera(CameraUpdateFactory.zoomTo(20));
             }
         };
 
         LocationRequest locationRequest = new LocationRequest();
-        locationRequest.setInterval(5000);
+        locationRequest.setInterval(1000);
         locationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+
         fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallback, Looper.myLooper());
     }
 }
