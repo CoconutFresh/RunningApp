@@ -7,21 +7,25 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 public class Login extends AppCompatActivity {
 
     private EditText username;
     private EditText password;
     private Button lg_Button;
+    private TextView register;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.login);
 
+        register = (TextView) findViewById(R.id.new_user);
         username = findViewById(R.id.lg_username);
         password = findViewById(R.id.lg_password);
         lg_Button = findViewById(R.id.lg_button);
+
 
         lg_Button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -29,6 +33,7 @@ public class Login extends AppCompatActivity {
                 validate(username.getText().toString(), password.getText().toString());
             }
         });
+
     }
 
     //TODO: Create actual login process
