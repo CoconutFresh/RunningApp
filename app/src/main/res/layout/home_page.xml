@@ -10,10 +10,29 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
+        android:layout_marginTop="20dp"
         android:textSize="50dp"
         android:text="TODO: Home"
         android:id="@+id/test" />
+
+    <Button
+        android:id="@+id/bt_fragment_1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/bt_test"
+        android:layout_marginLeft="60dp"
+        android:text="Fragment 1"
+        />
+
+    <Button
+        android:id="@+id/bt_fragment_2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/bt_test"
+        android:layout_toRightOf="@id/bt_fragment_1"
+        android:layout_marginLeft="35dp"
+        android:text="Fragment 2"
+        />
 
     <Button
         android:layout_width="wrap_content"
@@ -22,5 +41,13 @@
         android:layout_centerHorizontal="true"
         android:text="test"
         android:id="@+id/bt_test"/>
+
+    <FrameLayout
+        android:id="@+id/fl_fragment"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_below="@id/bt_fragment_1"
+        android:layout_alignParentBottom="true"
+        />
 
 </RelativeLayout>

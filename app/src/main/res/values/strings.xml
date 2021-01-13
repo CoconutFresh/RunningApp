@@ -15,4 +15,6 @@
     <string name="login_link">Already a User? Sign in here</string>
     <string name="birthday">Date of Birth:</string>
     <string name="date_format">mm/dd/yyyy</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

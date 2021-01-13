@@ -61,11 +61,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
 
 
-        /*// Default if location is not set to on
-        LatLng manila = new LatLng(15, 121);
-        mMap.addMarker(new MarkerOptions().position(manila).title("Marker in Manila"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(manila));*/
-        //startRun();
+
     }
 
     private void startRun() {
