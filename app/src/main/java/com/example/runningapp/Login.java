@@ -33,14 +33,6 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
 
         login = findViewById(R.id.lg_button);
         login.setOnClickListener(this);
-
-        /* if all else fails return to this
-        login.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                validate(username.getText().toString(), password.getText().toString());
-            }
-        }); */
     }
 
     @Override
@@ -53,7 +45,8 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
                 //TODO: Create password link
                 break;
             case R.id.lg_button:
-                //TODO: Create Login Function
+                //TODO: Create a proper login service
+                validate(username.getText().toString(), password.getText().toString()); //temporary
                 break;
         }
     }
@@ -64,8 +57,7 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
         if(un.equals("test") && pw.equals("test")) {
 
             //Switches over control of the app to the next activity
-            Intent intent = new Intent(Login.this, HomePage.class);
-            startActivity(intent);
+            startActivity(new Intent(this, HomePage.class));
             finish(); //Makes it so that the user can't use the back button to return to this page.
         }
     }

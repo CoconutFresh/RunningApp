@@ -15,6 +15,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Looper;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -30,10 +32,12 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.maps.model.RoundCap;
 import com.google.android.gms.maps.model.SquareCap;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, View.OnClickListener {
     private GoogleMap mMap;
     LocationManager locationManager;
     LocationListener locationListener;
+
+    Button button_start_run;
 
     final int ZOOM_LEVEL = 18;
 
@@ -45,6 +49,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        button_start_run = findViewById(R.id.button_start_run);
+        button_start_run.setOnClickListener(this);
 
     }
 
@@ -58,7 +65,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         LatLng manila = new LatLng(15, 121);
         mMap.addMarker(new MarkerOptions().position(manila).title("Marker in Manila"));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(manila));*/
-        startRun();
+        //startRun();
     }
 
     private void startRun() {
@@ -123,6 +130,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 return;
             default:
                 return;
+        }
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.button_start_run:
+                startRun();
+                break;
+            default:
+                break;
         }
     }
 }
