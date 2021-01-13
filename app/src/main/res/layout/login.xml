@@ -19,21 +19,21 @@
         />
 
     <EditText
-        android:id="@+id/lg_username"
+        android:id="@+id/lg_email"
         android:layout_width="300dp"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
-        android:hint="@string/username"
-        android:inputType="text"
-        android:autofillHints="username"
+        android:hint="@string/user_email"
+        android:inputType="textEmailAddress"
+        android:autofillHints="email"
         />
     <EditText
         android:id="@+id/lg_password"
         android:layout_width="300dp"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        android:layout_below="@id/lg_username"
+        android:layout_below="@id/lg_email"
         android:hint="@string/user_password"
         android:inputType="textPassword"
         android:autofillHints="password"
