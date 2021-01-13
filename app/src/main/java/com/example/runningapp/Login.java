@@ -9,12 +9,13 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-public class Login extends AppCompatActivity {
+public class Login extends AppCompatActivity implements View.OnClickListener {
 
     private EditText username;
     private EditText password;
-    private Button lg_Button;
+    private Button login;
     private TextView register;
+    private TextView forgotPassword;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,18 +23,39 @@ public class Login extends AppCompatActivity {
         setContentView(R.layout.login);
 
         register = (TextView) findViewById(R.id.new_user);
+        register.setOnClickListener(this);
+
+        forgotPassword = (TextView) findViewById(R.id.forgot_password);
+        forgotPassword.setOnClickListener(this);
+
         username = findViewById(R.id.lg_username);
         password = findViewById(R.id.lg_password);
-        lg_Button = findViewById(R.id.lg_button);
 
+        login = findViewById(R.id.lg_button);
+        login.setOnClickListener(this);
 
-        lg_Button.setOnClickListener(new View.OnClickListener() {
+        /* if all else fails return to this
+        login.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 validate(username.getText().toString(), password.getText().toString());
             }
-        });
+        }); */
+    }
 
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.new_user:
+                startActivity(new Intent(this, Register.class));
+                break;
+            case R.id.forgot_password:
+                //TODO: Create password link
+                break;
+            case R.id.lg_button:
+                //TODO: Create Login Function
+                break;
+        }
     }
 
     //TODO: Create actual login process

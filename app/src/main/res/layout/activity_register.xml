@@ -49,7 +49,6 @@
         android:layout_below="@id/user_firstname"
         android:text="@string/birthday"
         android:textSize="20sp"
-        android:textFont="sans-serif-black"
         android:layout_marginStart="59dp"
         android:layout_marginTop="9dp"
         />
