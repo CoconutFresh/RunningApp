@@ -1,4 +1,18 @@
 <resources>
     <string name="app_name">RunningApp</string>
     <string name="title_activity_maps">Map</string>
+    <string name="login_title">Naruto Run</string>
+    <string name="username">Username</string>
+    <string name="user_email">Email Address</string>
+    <string name="user_password">Password</string>
+    <string name="login_button">Login</string>
+    <string name="register_button">Create Account</string>
+    <string name="forgot_pass_link">Forgot Password?</string>
+    <string name="new_user_link">User Registration</string>
+    <string name="user_fn">First Name</string>
+    <string name="user_ln">Last Name</string>
+    <string name="register_title">New User Registration</string>
+    <string name="login_link">Already a User? Sign in here</string>
+    <string name="birthday">Date of Birth:</string>
+    <string name="date_format">mm/dd/yyyy</string>
 </resources>
