@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">RunningApp</string>
+    <!-- Login/Registration String Values -->
     <string name="title_activity_maps">Map</string>
     <string name="login_title">Naruto Run</string>
     <string name="username">Username</string>
@@ -15,6 +16,11 @@
     <string name="login_link">Already a User? Sign in here</string>
     <string name="birthday">Date of Birth:</string>
     <string name="date_format">mm/dd/yyyy</string>
+
+    <!-- Settings Bar String Values -->
+    <string name="profile">Profile</string>
+    <string name="settings">Account Settings</string>
+    <string name="logout">Logout</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

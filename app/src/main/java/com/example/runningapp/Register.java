@@ -17,6 +17,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.FirebaseDatabase;
 
  public class Register extends AppCompatActivity implements View.OnClickListener {
@@ -131,13 +132,15 @@ import com.google.firebase.database.FirebaseDatabase;
                                 @Override
                                 public void onComplete(@NonNull Task<Void> task) {
                                     if(task.isSuccessful()) {
-                                        Toast.makeText(Register.this, "Account has been created successfully!", Toast.LENGTH_LONG).show();
-                                        progressBar.setVisibility(View.GONE);
+                                        Toast.makeText(Register.this, "Account has been created successfully! Please check your email and verify your account!", Toast.LENGTH_LONG).show();
+                                        FirebaseAuth.getInstance().getCurrentUser().sendEmailVerification();
+                                        startActivity(new Intent(Register.this, Login.class));
+                                        finish();
                                     }
                                     else {
                                         Toast.makeText(Register.this, "Registration failed, please try again", Toast.LENGTH_LONG).show();
-                                        progressBar.setVisibility(View.GONE);
                                     }
+                                    progressBar.setVisibility(View.GONE);
                                 }
                             });
                         }
