@@ -15,6 +15,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.google.firebase.auth.FirebaseAuth;
+
 public class HomePage extends AppCompatActivity implements View.OnClickListener {
 
     Button testButton;
@@ -61,12 +63,15 @@ public class HomePage extends AppCompatActivity implements View.OnClickListener 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch(item.getItemId()) {
-            case R.id.settingsMenu:
+            case R.id.profile_link:
+                //TODO: Create Link to user profile
+                return true;
+            case R.id.settings_link:
                 Intent intent = new Intent(HomePage.this, Settings.class);
                 startActivity(intent);
                 return true;
-            case R.id.testMenu:
-                Toast.makeText(this, "Place holder", Toast.LENGTH_SHORT).show();
+            case R.id.logout_btn:
+                logout();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -90,5 +95,11 @@ public class HomePage extends AppCompatActivity implements View.OnClickListener 
                 fragmentTransaction.commit();
                 break;
         }
+    }
+
+    public void logout() {
+        FirebaseAuth.getInstance().signOut();
+        startActivity(new Intent(HomePage.this, Login.class));
+        finish();
     }
 }

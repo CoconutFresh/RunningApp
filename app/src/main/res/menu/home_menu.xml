@@ -3,13 +3,19 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:title="Settings"
-        android:id="@+id/settingsMenu"
+        android:id="@+id/profile_link"
+        android:title="@string/profile"
         app:showAsAction="never"/>
 
     <item
-        android:title="test"
-        android:id="@+id/testMenu"
+        android:id="@+id/settings_link"
+        android:title="@string/settings"
         app:showAsAction="never"/>
+
+    <item
+        android:id="@+id/logout_btn"
+        android:title="@string/logout"
+        app:showAsAction="never"
+        />
 
 </menu>
