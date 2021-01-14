@@ -64,7 +64,7 @@ public class HomePage extends AppCompatActivity implements View.OnClickListener 
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch(item.getItemId()) {
             case R.id.profile_link:
-                //TODO: Create Link to user profile
+                startActivity(new Intent(HomePage.this, Profile.class));
                 return true;
             case R.id.settings_link:
                 Intent intent = new Intent(HomePage.this, Settings.class);

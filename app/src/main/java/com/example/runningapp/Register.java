@@ -21,7 +21,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.FirebaseDatabase;
 
  public class Register extends AppCompatActivity implements View.OnClickListener {
-    private TextView banner, registerUser;
+    private TextView banner, registerUser, loginLink;
     private EditText fNameField, lNameField, birthdayField, usernameField, emailField, passwordField;
     private ProgressBar progressBar;
 
@@ -47,6 +47,9 @@ import com.google.firebase.database.FirebaseDatabase;
         emailField = (EditText) findViewById(R.id.rg_email);
         passwordField = (EditText) findViewById(R.id.rg_password);
 
+        loginLink = (TextView) findViewById(R.id.login_link);
+        loginLink.setOnClickListener(this);
+
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
     }
 
@@ -58,6 +61,9 @@ import com.google.firebase.database.FirebaseDatabase;
                 break;
             case R.id.rg_button:
                 registerUser();
+                break;
+            case R.id.login_link:
+                startActivity(new Intent(this, Login.class));
                 break;
         }
      }

@@ -120,14 +120,26 @@
         />
 
     <TextView
-        android:id="@+id/login_link"
+        android:id="@+id/login_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/rg_button"
         android:textAlignment="center"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="25dp"
-        android:text="@string/login_link"
+        android:text="@string/login_link_label"
+        />
+
+    <TextView
+        android:id="@+id/login_link"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/rg_button"
+        android:layout_toEndOf="@id/login_text"
+        android:layout_marginTop="25dp"
+        android:layout_marginLeft="4dp"
+        android:text="@string/here_link"
+        android:textColor="@color/teal_700"
         />
 
 </RelativeLayout>

@@ -7,7 +7,7 @@
          location permissions for the "MyLocation" functionality.
     -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:allowBackup="true"
@@ -16,7 +16,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.RunningApp">
-        <activity android:name=".Register"></activity>
+        <activity android:name=".Profile"></activity>
+        <activity android:name=".Register" />
         <activity android:name=".Settings" />
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.

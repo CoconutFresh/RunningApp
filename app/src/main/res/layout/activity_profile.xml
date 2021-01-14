@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Profile">
+
+    <TextView
+        android:id="@+id/profile_banner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:text="Profile"
+        android:fontFamily="sans-serif-black"
+        android:textSize="50sp"
+        android:textAlignment="center"
+        android:layout_marginTop="40dp"
+        />
+
+    <TableLayout
+        android:layout_below="@id/profile_banner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="50dp"
+        android:stretchColumns="1">
+
+        <TableRow>
+            <TextView
+                android:text="Name:"
+                android:textSize="18sp"
+                android:layout_marginLeft="25dp"
+                />
+            <TextView
+                android:id="@+id/user_fullname"
+                android:textSize="18sp"
+                android:layout_marginLeft="75dp"
+                />
+        </TableRow>
+
+        <TableRow>
+            <TextView
+                android:text="Birthday:"
+                android:textSize="18sp"
+                android:layout_marginLeft="25dp"
+                />
+            <TextView
+                android:id="@+id/user_birthday"
+                android:textSize="18sp"
+                android:layout_marginLeft="75dp"
+                />
+        </TableRow>
+
+        <TableRow>
+            <TextView
+                android:text="Username:"
+                android:textSize="18sp"
+                android:layout_marginLeft="25dp"
+                />
+            <TextView
+                android:id="@+id/username"
+                android:textSize="18sp"
+                android:layout_marginLeft="75dp"
+                />
+        </TableRow>
+
+        <TableRow>
+            <TextView
+                android:text="Email:"
+                android:textSize="18sp"
+                android:layout_marginLeft="25dp"
+                />
+            <TextView
+                android:id="@+id/user_email"
+                android:textSize="18sp"
+                android:layout_marginLeft="75dp"
+                />
+        </TableRow>
+
+    </TableLayout>
+
+</RelativeLayout>

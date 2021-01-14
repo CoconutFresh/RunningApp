@@ -13,7 +13,8 @@
     <string name="user_fn">First Name</string>
     <string name="user_ln">Last Name</string>
     <string name="register_title">New User Registration</string>
-    <string name="login_link">Already a User? Sign in here</string>
+    <string name="login_link_label">Already a User? Sign in</string>
+    <string name="here_link">here</string>
     <string name="birthday">Date of Birth:</string>
     <string name="date_format">mm/dd/yyyy</string>
 
