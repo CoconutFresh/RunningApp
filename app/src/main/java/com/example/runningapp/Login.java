@@ -57,7 +57,7 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
                 startActivity(new Intent(this, Register.class));
                 break;
             case R.id.forgot_password:
-                //TODO: Create password link
+                startActivity(new Intent(this, ForgotPassword.class));
                 break;
             case R.id.lg_button:
                 //validate(username.getText().toString(), password.getText().toString()); //temporary
