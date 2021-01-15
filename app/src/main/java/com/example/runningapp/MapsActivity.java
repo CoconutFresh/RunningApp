@@ -87,8 +87,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 3000, 0, this);
 
         //test
-        bt_startRun_test = findViewById(R.id.bt_startRun_test);
-        bt_startRun_test.setOnClickListener(this);
+        /*bt_startRun_test = findViewById(R.id.bt_startRun_test);
+        bt_startRun_test.setOnClickListener(this);*/
 
         /*bt_startRun = findViewById(R.id.bt_startRun);
         bt_startRun.setOnClickListener(this);
@@ -140,15 +140,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.bt_startRun_test:
-                /*fragmentTransaction = fragmentManager.beginTransaction();
+           /* case R.id.bt_startRun_test:
+                *//*fragmentTransaction = fragmentManager.beginTransaction();
                 //fragmentTransaction.replace(R.id.fl_saveme, runningFragment);
-                fragmentTransaction.commit();*/
+                fragmentTransaction.commit();*//*
                 isRunning = true;
                 //startRun();
                 break;
             case R.id.bt_stopRun:
-                /*fragmentTransaction = fragmentManager.beginTransaction();
+                *//*fragmentTransaction = fragmentManager.beginTransaction();
                 //fragmentTransaction.replace(R.id.fl_saveme, initializeRunFragment);
                 fragmentTransaction.commit();
                 isRunning = false;*/

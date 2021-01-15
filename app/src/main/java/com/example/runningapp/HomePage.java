@@ -19,12 +19,9 @@ import com.google.firebase.auth.FirebaseAuth;
 
 public class HomePage extends AppCompatActivity implements View.OnClickListener {
 
-    Button testButton;
-    Button fragmentButton1;
-    Button fragmentButton2;
+    Button testButton, fragmentButton1, fragmentButton2, bt_switch_fg1, bt_switch_fg2;
 
-    Fragment firstFragment;
-    Fragment secondFragment;
+    Fragment firstFragment, secondFragment;
     FragmentManager fragmentManager;
     FragmentTransaction fragmentTransaction;
 
@@ -41,6 +38,12 @@ public class HomePage extends AppCompatActivity implements View.OnClickListener 
 
         fragmentButton2 = findViewById(R.id.bt_fragment_2);
         fragmentButton2.setOnClickListener(this);
+
+        /*bt_switch_fg1 = findViewById(R.id.bt_switch_fg1);
+        bt_switch_fg1.setOnClickListener(this);
+
+        bt_switch_fg2 = findViewById(R.id.bt_switch_fg2);
+        bt_switch_fg2.setOnClickListener(this);*/
 
         firstFragment = new FirstFragment();
         secondFragment = new SecondFragment();
@@ -93,6 +96,18 @@ public class HomePage extends AppCompatActivity implements View.OnClickListener 
                 fragmentTransaction = fragmentManager.beginTransaction();
                 fragmentTransaction.replace(R.id.fl_fragment, secondFragment);
                 fragmentTransaction.commit();
+                break;
+            case R.id.bt_switch_fg1:
+                fragmentTransaction = fragmentManager.beginTransaction();
+                fragmentTransaction.replace(R.id.fl_fragment, secondFragment);
+                fragmentTransaction.commit();
+                break;
+            case R.id.bt_switch_fg2:
+                fragmentTransaction = fragmentManager.beginTransaction();
+                fragmentTransaction.replace(R.id.fl_fragment, firstFragment);
+                fragmentTransaction.commit();
+                break;
+            default:
                 break;
         }
     }

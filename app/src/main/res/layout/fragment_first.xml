@@ -6,11 +6,20 @@
     tools:context=".FirstFragment">
 
     <TextView
+        android:id="@+id/tv_fragment1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:layout_centerHorizontal="true"
         android:text="FRAGMENT 1"
         android:textSize="50dp"/>
+
+    <Button
+        android:id="@+id/bt_switch_fg1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Switch"
+        android:layout_below="@id/tv_fragment1"
+        android:layout_centerHorizontal="true"/>
 
 </RelativeLayout>
