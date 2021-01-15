@@ -5,12 +5,21 @@
     android:layout_height="match_parent"
     tools:context=".InitializeRunFragment">
 
+    <TextView
+        android:id="@+id/tv_initializeRun"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:text="Initialize Run"
+        android:textSize="30dp" />
+
     <Button
         android:id="@+id/bt_startRun"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
         android:layout_centerHorizontal="true"
+        android:layout_below="@+id/tv_initializeRun"
         android:text="Start"/>
 
 </RelativeLayout>

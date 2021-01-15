@@ -26,6 +26,7 @@ import android.widget.Toast;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMapOptions;
+import com.google.android.gms.maps.LocationSource;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
@@ -39,17 +40,16 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.maps.model.RoundCap;
 import com.google.android.gms.maps.model.SquareCap;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, View.OnClickListener, LocationListener {
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, View.OnClickListener, LocationListener, LocationSource {
     private GoogleMap mMap;
     LocationManager locationManager;
     PolylineOptions runRouteOptions;
     CameraPosition initialCamera;
-
-    Fragment initializeRunFragment, runningFragment;
-    FragmentManager fragmentManager;
+    Fragment initializeRun = new InitializeRunFragment();
+    FragmentManager fragmentManager = getSupportFragmentManager();
     FragmentTransaction fragmentTransaction;
 
-    Button bt_startRun, bt_stopRun, bt_startRun_test;
+    private OnLocationChangedListener mapLocationListener = null;
 
     boolean isRunning = false, initialState = true;
 
@@ -71,6 +71,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .jointType(JointType.ROUND)
                 .color(Color.CYAN);
 
+        //Test to see how fragments work
+        fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.replace(R.id.maps_rl_fragment, initializeRun);
+        fragmentTransaction.commit();
+
         //For finding current location of device
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         //Checks for permissions
@@ -86,23 +91,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 3000, 0, this);
 
-        //test
-        /*bt_startRun_test = findViewById(R.id.bt_startRun_test);
-        bt_startRun_test.setOnClickListener(this);*/
-
-        /*bt_startRun = findViewById(R.id.bt_startRun);
-        bt_startRun.setOnClickListener(this);
-        bt_stopRun = findViewById(R.id.bt_stopRun);
-        bt_stopRun.setOnClickListener(this);*/
-
-        /*initializeRunFragment = new InitializeRunFragment();
-        runningFragment = new RunningFragment();*/
-
-        /*fragmentManager = getSupportFragmentManager();
-        fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.replace(R.id.fl_saveme, initializeRunFragment);
-        fragmentTransaction.commit();*/
-
     }
 
     @SuppressLint("MissingPermission")
@@ -110,8 +98,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+
+        //Enables my location layer
         mMap.setMyLocationEnabled(true);
-        //mMap.animateCamera(CameraUpdateFactory.zoomTo(ZOOM_LEVEL));
+        mMap.setLocationSource(this); //Specifically changes the location data from beta fusedlocationproviderclient to chad Android.location.Location
     }
 
     private void startRun(LatLng location) {
@@ -163,13 +153,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         Log.d("trackLog", "Lat is: " + location.getLatitude() + ", "
                 + "Lng is: " + location.getLongitude());
 
+        mapLocationListener.onLocationChanged(location); //This is where it switches poopy default fusedLocationProviderClient to Android.location.Location
         LatLng curLoc = new LatLng(location.getLatitude(), location.getLongitude());
 
-        if (isRunning) {
+        if (isRunning) { //User clicks start run
             startRun(curLoc);
-            Toast.makeText(this, "Starting run", Toast.LENGTH_SHORT).show();
         }
-        else if (!isRunning && initialState) {
+        else if (!isRunning && initialState) { //Initial map preparations before the user starts run
             initialCamera = new CameraPosition.Builder()
                     .target(curLoc)
                     .zoom(18)
@@ -179,8 +169,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             mMap.animateCamera(CameraUpdateFactory.newCameraPosition(initialCamera));
             initialState = false;
-        } else if (!isRunning && !initialState) {
+        } else if (!isRunning && !initialState) { //Map shows users location before run starts
             mMap.animateCamera(CameraUpdateFactory.newLatLng(curLoc));
         }
+    }
+
+    //Necessary methods in order to change the locationSource to chad Android.location.Location
+    @Override
+    public void activate(OnLocationChangedListener onLocationChangedListener) {
+        this.mapLocationListener = onLocationChangedListener;
+    }
+
+    @Override
+    public void deactivate() {
+        this.mapLocationListener = null;
     }
 }
