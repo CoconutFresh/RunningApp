@@ -40,7 +40,7 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.maps.model.RoundCap;
 import com.google.android.gms.maps.model.SquareCap;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, View.OnClickListener, LocationListener, LocationSource {
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, View.OnClickListener, LocationListener, LocationSource, RunningFragment.RunningListener, InitializeRunFragment.InitRunListener {
     private GoogleMap mMap;
     LocationManager locationManager;
     PolylineOptions runRouteOptions;
@@ -48,6 +48,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     Fragment initializeRun = new InitializeRunFragment();
     FragmentManager fragmentManager = getSupportFragmentManager();
     FragmentTransaction fragmentTransaction;
+    Location pastLoc;
 
     private OnLocationChangedListener mapLocationListener = null;
 
@@ -71,10 +72,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .jointType(JointType.ROUND)
                 .color(Color.CYAN);
 
-        //Test to see how fragments work
+        //Starts the Maps Activity with the initialize run fragment
         fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.replace(R.id.maps_rl_fragment, initializeRun);
-        fragmentTransaction.commit();
+        fragmentTransaction.replace(R.id.maps_rl_fragment, initializeRun).commit();
 
         //For finding current location of device
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
@@ -87,10 +87,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 }, 10);
                 return;
             }
-
         }
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 3000, 0, this);
-
     }
 
     @SuppressLint("MissingPermission")
@@ -108,7 +106,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         //TODO: Make Polyline look nicer
 
-        Log.d("polylineDebug", "This is being called");
+        //Log.d("polylineDebug", "This is being called");
         runRouteOptions.add(location);
         mMap.addPolyline(runRouteOptions);
         mMap.animateCamera(CameraUpdateFactory.newLatLng(location));
@@ -119,6 +117,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         switch (requestCode) {
             case 10:
                 if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    //TODO: Probably work on the edge cases if the user doesn't give permissions etc.
                     //startRun();
                 }
                 return;
@@ -130,18 +129,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-           /* case R.id.bt_startRun_test:
-                *//*fragmentTransaction = fragmentManager.beginTransaction();
-                //fragmentTransaction.replace(R.id.fl_saveme, runningFragment);
-                fragmentTransaction.commit();*//*
-                isRunning = true;
-                //startRun();
-                break;
-            case R.id.bt_stopRun:
-                *//*fragmentTransaction = fragmentManager.beginTransaction();
-                //fragmentTransaction.replace(R.id.fl_saveme, initializeRunFragment);
-                fragmentTransaction.commit();
-                isRunning = false;*/
             default:
                 break;
         }
@@ -157,6 +144,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         LatLng curLoc = new LatLng(location.getLatitude(), location.getLongitude());
 
         if (isRunning) { //User clicks start run
+            //Testing distance algorithm
+            Log.d("dist", "Distance Traveled: " + getDistanceKm(pastLoc, location));
+            pastLoc = location;
             startRun(curLoc);
         }
         else if (!isRunning && initialState) { //Initial map preparations before the user starts run
@@ -171,6 +161,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             initialState = false;
         } else if (!isRunning && !initialState) { //Map shows users location before run starts
             mMap.animateCamera(CameraUpdateFactory.newLatLng(curLoc));
+            pastLoc = location;
         }
     }
 
@@ -183,5 +174,39 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void deactivate() {
         this.mapLocationListener = null;
+    }
+
+    //These two methods are for interacting with the Running and InitRun fragments
+    @Override
+    public void onStartRunPressed(boolean isRunning) { //Starts run when bt_startRun in initializeRunFragment is pressed
+        this.isRunning = isRunning;
+    }
+
+    @Override
+    public void onStopRunPressed(boolean isRunning) { //Stops run when bt_stopRun in RunningFragment is pressed
+        this.isRunning = isRunning;
+    }
+
+
+    //Haversine formula for calculating distance between two sets of LatLng
+    private double getDistanceKm(Location point1, Location point2) {
+        int earthRadius = 6371;
+        double lat1 = point1.getLatitude(), lat2 = point2.getLatitude();
+
+        double dLat = deg2Rad(point2.getLatitude() - point1.getLatitude());
+        double dLng = deg2Rad(point2.getLongitude() - point1.getLongitude());
+        double a =
+                Math.sin(dLat/2) * Math.sin(dLat/2)
+                + Math.cos(deg2Rad(lat1)) * Math.cos(deg2Rad(lat2))
+                * Math.sin(dLng/2) * Math.sin(dLng/2);
+
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        double d = earthRadius * c;
+
+        return d;
+    }
+
+    private double deg2Rad(double deg) {
+        return deg * (Math.PI/180);
     }
 }

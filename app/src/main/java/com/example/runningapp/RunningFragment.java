@@ -1,7 +1,9 @@
 package com.example.runningapp;
 
+import android.content.Context;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -18,6 +20,11 @@ public class RunningFragment extends Fragment implements View.OnClickListener {
     Fragment initializeRun;
     FragmentManager fragmentManager;
     FragmentTransaction fragmentTransaction;
+    RunningListener listener;
+
+    public interface RunningListener {
+        void onStopRunPressed(boolean isRunning);
+    }
 
     public RunningFragment() {
         // Required empty public constructor
@@ -45,6 +52,8 @@ public class RunningFragment extends Fragment implements View.OnClickListener {
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.bt_stopRun:
+                listener.onStopRunPressed(false);
+
                 fragmentManager = getFragmentManager();
                 fragmentTransaction = fragmentManager.beginTransaction();
                 fragmentTransaction.replace(R.id.maps_rl_fragment, initializeRun);
@@ -53,5 +62,23 @@ public class RunningFragment extends Fragment implements View.OnClickListener {
             default:
                 break;
         }
+    }
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        if(context instanceof RunningListener) {
+            listener = (RunningListener) context;
+        }
+        else {
+            throw new RuntimeException(context.toString()
+                + "must implement RunningListener");
+        }
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        listener = null;
     }
 }

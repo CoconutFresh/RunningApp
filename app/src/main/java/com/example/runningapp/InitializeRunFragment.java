@@ -1,7 +1,9 @@
 package com.example.runningapp;
 
+import android.content.Context;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -18,6 +20,11 @@ public class InitializeRunFragment extends Fragment implements View.OnClickListe
     Fragment runningFragment;
     FragmentManager fragmentManager;
     FragmentTransaction fragmentTransaction;
+    private InitRunListener listener;
+
+    public interface InitRunListener {
+        void onStartRunPressed(boolean isRunning);
+    }
 
     public InitializeRunFragment() {
         // Required empty public constructor
@@ -45,6 +52,8 @@ public class InitializeRunFragment extends Fragment implements View.OnClickListe
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.bt_startRun:
+                listener.onStartRunPressed(true);
+
                 fragmentManager = getFragmentManager();
                 fragmentTransaction = fragmentManager.beginTransaction();
                 fragmentTransaction.replace(R.id.maps_rl_fragment, runningFragment);
@@ -53,5 +62,23 @@ public class InitializeRunFragment extends Fragment implements View.OnClickListe
             default:
                 break;
         }
+    }
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        if(context instanceof InitRunListener) {
+            listener = (InitRunListener) context;
+        }
+        else {
+            throw new RuntimeException(context.toString()
+                + "must implement initRunListener");
+        }
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        listener = null;
     }
 }
