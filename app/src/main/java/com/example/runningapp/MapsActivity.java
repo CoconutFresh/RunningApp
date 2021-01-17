@@ -40,13 +40,13 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.maps.model.RoundCap;
 import com.google.android.gms.maps.model.SquareCap;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, View.OnClickListener, LocationListener, LocationSource, RunningFragment.RunningListener, InitializeRunFragment.InitRunListener {
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener, LocationSource, RunningFragment.RunningListener, InitializeRunFragment.InitRunListener {
     private GoogleMap mMap;
     LocationManager locationManager;
     PolylineOptions runRouteOptions;
     CameraPosition initialCamera;
-    Fragment initializeRun = new InitializeRunFragment();
-    FragmentManager fragmentManager = getSupportFragmentManager();
+    Fragment initializeRun;
+    FragmentManager fragmentManager;
     FragmentTransaction fragmentTransaction;
     Location pastLoc;
 
@@ -57,24 +57,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_maps);
+        setContentView(R.layout.activity_maps); //Connects activity to layout layer
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        //For line graphing
-        runRouteOptions = new PolylineOptions();
-        runRouteOptions.clickable(false)
-                .width(20)
-                .startCap(new RoundCap())
-                .jointType(JointType.ROUND)
-                .color(Color.CYAN);
+        initPolyline(); //For line graphing
 
-        //Starts the Maps Activity with the initialize run fragment
-        fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.replace(R.id.maps_rl_fragment, initializeRun).commit();
+        initFrag(); //Initialize fragments
 
         //For finding current location of device
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
@@ -102,14 +94,22 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.setLocationSource(this); //Specifically changes the location data from beta fusedlocationproviderclient to chad Android.location.Location
     }
 
-    private void startRun(LatLng location) {
+    private void initPolyline() {
+        //For line graphing
+        runRouteOptions = new PolylineOptions();
+        runRouteOptions.clickable(false)
+                .width(20)
+                .startCap(new RoundCap())
+                .jointType(JointType.ROUND)
+                .color(Color.CYAN);
+    }
 
-        //TODO: Make Polyline look nicer
-
-        //Log.d("polylineDebug", "This is being called");
-        runRouteOptions.add(location);
-        mMap.addPolyline(runRouteOptions);
-        mMap.animateCamera(CameraUpdateFactory.newLatLng(location));
+    private void initFrag() {
+        //Starts the Maps Activity with the initialize run fragment
+        initializeRun = new InitializeRunFragment();
+        fragmentManager = getSupportFragmentManager();
+        fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.replace(R.id.maps_rl_fragment, initializeRun).commit();
     }
 
     @Override
@@ -123,14 +123,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 return;
             default:
                 return;
-        }
-    }
-
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            default:
-                break;
         }
     }
 
@@ -150,19 +142,35 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             startRun(curLoc);
         }
         else if (!isRunning && initialState) { //Initial map preparations before the user starts run
-            initialCamera = new CameraPosition.Builder()
-                    .target(curLoc)
-                    .zoom(18)
-                    .bearing(0)
-                    .tilt(0)
-                    .build();
-
-            mMap.animateCamera(CameraUpdateFactory.newCameraPosition(initialCamera));
-            initialState = false;
-        } else if (!isRunning && !initialState) { //Map shows users location before run starts
+            initCamera(curLoc);
+        }
+        else if (!isRunning && !initialState) { //Map shows users location before run starts
             mMap.animateCamera(CameraUpdateFactory.newLatLng(curLoc));
             pastLoc = location;
         }
+    }
+
+    //For tracking
+    private void startRun(LatLng location) {
+
+        //TODO: Make Polyline look nicer
+
+        //Log.d("polylineDebug", "This is being called");
+        runRouteOptions.add(location);
+        mMap.addPolyline(runRouteOptions);
+        mMap.animateCamera(CameraUpdateFactory.newLatLng(location));
+    }
+
+    private void initCamera(LatLng curLoc) {
+        initialCamera = new CameraPosition.Builder()
+                .target(curLoc)
+                .zoom(18)
+                .bearing(0)
+                .tilt(0)
+                .build();
+
+        mMap.animateCamera(CameraUpdateFactory.newCameraPosition(initialCamera));
+        initialState = false;
     }
 
     //Necessary methods in order to change the locationSource to chad Android.location.Location
@@ -186,7 +194,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onStopRunPressed(boolean isRunning) { //Stops run when bt_stopRun in RunningFragment is pressed
         this.isRunning = isRunning;
     }
-
 
     //Haversine formula for calculating distance between two sets of LatLng
     private double getDistanceKm(Location point1, Location point2) {
