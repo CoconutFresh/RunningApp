@@ -49,11 +49,19 @@
         android:textSize="16sp"
         />
 
+    <com.google.android.gms.common.SignInButton
+        android:id="@+id/google_button"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/lg_button"
+        android:textSize="16sp"
+        />
     <TextView
         android:id="@+id/forgot_password"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/lg_button"
+        android:layout_below="@id/google_button"
         android:layout_marginTop="25dp"
         android:layout_marginStart="55dp"
         android:text="@string/forgot_pass_link"
@@ -64,7 +72,7 @@
         android:id="@+id/new_user"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/lg_button"
+        android:layout_below="@id/google_button"
         android:layout_toEndOf="@id/forgot_password"
         android:layout_marginTop="25dp"
         android:layout_marginStart="75dp"
