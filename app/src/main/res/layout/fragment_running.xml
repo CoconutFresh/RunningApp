@@ -22,4 +22,26 @@
         android:layout_centerHorizontal="true"
         android:text="Stop"/>
 
+    <Chronometer
+        android:id="@+id/timer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tv_Running"
+        android:layout_toLeftOf="@id/bt_stopRun"
+        android:layout_marginRight="15dp"
+        android:textSize="25dp"/>
+
+    <TextView
+        android:id="@+id/tv_totalDist"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tv_Running"
+        android:layout_toRightOf="@id/bt_stopRun"
+        android:layout_marginLeft="15dp"
+        android:textSize="25dp"
+        android:text="0.00"/>
+
+
+
+
 </RelativeLayout>

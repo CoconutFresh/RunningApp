@@ -9,6 +9,7 @@ import androidx.fragment.app.FragmentTransaction;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Camera;
 import android.graphics.Color;
@@ -39,6 +40,7 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.maps.model.RoundCap;
 import com.google.android.gms.maps.model.SquareCap;
+import com.google.firebase.database.annotations.NotNull;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener, LocationSource, RunningFragment.RunningListener, InitializeRunFragment.InitRunListener {
     private GoogleMap mMap;
@@ -49,6 +51,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     FragmentManager fragmentManager;
     FragmentTransaction fragmentTransaction;
     Location pastLoc;
+    double totalDistRan = 0; //In km for now
 
     private OnLocationChangedListener mapLocationListener = null;
 
@@ -135,11 +138,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mapLocationListener.onLocationChanged(location); //This is where it switches poopy default fusedLocationProviderClient to Android.location.Location
         LatLng curLoc = new LatLng(location.getLatitude(), location.getLongitude());
 
+        //In charge of how map is displayed to the runner (Running vs. Not Running)
         if (isRunning) { //User clicks start run
             //Testing distance algorithm
             Log.d("dist", "Distance Traveled: " + getDistanceKm(pastLoc, location));
-            pastLoc = location;
-            startRun(curLoc);
+            totalDistRan += getDistanceKm(pastLoc, location) + 5; //Adds to the total distance ran
+            pastLoc = location; //Updates the past location to the current location
+            updateMapVisuals(curLoc);
         }
         else if (!isRunning && initialState) { //Initial map preparations before the user starts run
             initCamera(curLoc);
@@ -150,8 +155,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
-    //For tracking
-    private void startRun(LatLng location) {
+    //For tracking, in charge of following device and drawing lines between past locations with present
+    private void updateMapVisuals(LatLng location) {
 
         //TODO: Make Polyline look nicer
 
@@ -171,6 +176,32 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         mMap.animateCamera(CameraUpdateFactory.newCameraPosition(initialCamera));
         initialState = false;
+    }
+
+    //Haversine formula for calculating distance between two sets of LatLng
+    private double getDistanceKm(@NotNull Location point1,@NotNull Location point2) {
+        int earthRadius = 6371;
+        double lat1 = point1.getLatitude(), lat2 = point2.getLatitude();
+
+        double dLat = deg2Rad(point2.getLatitude() - point1.getLatitude());
+        double dLng = deg2Rad(point2.getLongitude() - point1.getLongitude());
+        double a =
+                Math.sin(dLat/2) * Math.sin(dLat/2)
+                        + Math.cos(deg2Rad(lat1)) * Math.cos(deg2Rad(lat2))
+                        * Math.sin(dLng/2) * Math.sin(dLng/2);
+
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        double d = earthRadius * c;
+
+        return d;
+    }
+
+    private double deg2Rad(double deg) {
+        return deg * (Math.PI/180);
+    }
+
+    protected double getTotalDist() {
+        return totalDistRan;
     }
 
     //Necessary methods in order to change the locationSource to chad Android.location.Location
@@ -193,27 +224,5 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onStopRunPressed(boolean isRunning) { //Stops run when bt_stopRun in RunningFragment is pressed
         this.isRunning = isRunning;
-    }
-
-    //Haversine formula for calculating distance between two sets of LatLng
-    private double getDistanceKm(Location point1, Location point2) {
-        int earthRadius = 6371;
-        double lat1 = point1.getLatitude(), lat2 = point2.getLatitude();
-
-        double dLat = deg2Rad(point2.getLatitude() - point1.getLatitude());
-        double dLng = deg2Rad(point2.getLongitude() - point1.getLongitude());
-        double a =
-                Math.sin(dLat/2) * Math.sin(dLat/2)
-                + Math.cos(deg2Rad(lat1)) * Math.cos(deg2Rad(lat2))
-                * Math.sin(dLng/2) * Math.sin(dLng/2);
-
-        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-        double d = earthRadius * c;
-
-        return d;
-    }
-
-    private double deg2Rad(double deg) {
-        return deg * (Math.PI/180);
     }
 }

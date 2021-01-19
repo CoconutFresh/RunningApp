@@ -54,6 +54,7 @@ public class InitializeRunFragment extends Fragment implements View.OnClickListe
             case R.id.bt_startRun:
                 listener.onStartRunPressed(true);
 
+                //Switches from InitializeRun to Running
                 fragmentManager = getFragmentManager();
                 fragmentTransaction = fragmentManager.beginTransaction();
                 fragmentTransaction.replace(R.id.maps_rl_fragment, runningFragment);
