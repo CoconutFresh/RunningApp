@@ -19,7 +19,7 @@ import com.google.firebase.auth.FirebaseAuth;
 
 public class HomePage extends AppCompatActivity implements View.OnClickListener {
 
-    Button testButton, fragmentButton1, fragmentButton2, bt_switch_fg1, bt_switch_fg2;
+    Button testButton, fragmentButton1, fragmentButton2;
 
     Fragment firstFragment, secondFragment;
     FragmentManager fragmentManager;
@@ -88,23 +88,15 @@ public class HomePage extends AppCompatActivity implements View.OnClickListener 
                 startActivity(new Intent(this, MapsActivity.class));
                 break;
             case R.id.bt_fragment_1:
+            case R.id.bt_switch_fg2:
                 fragmentTransaction = fragmentManager.beginTransaction();
                 fragmentTransaction.replace(R.id.fl_fragment, firstFragment);
                 fragmentTransaction.commit();
                 break;
             case R.id.bt_fragment_2:
-                fragmentTransaction = fragmentManager.beginTransaction();
-                fragmentTransaction.replace(R.id.fl_fragment, secondFragment);
-                fragmentTransaction.commit();
-                break;
             case R.id.bt_switch_fg1:
                 fragmentTransaction = fragmentManager.beginTransaction();
                 fragmentTransaction.replace(R.id.fl_fragment, secondFragment);
-                fragmentTransaction.commit();
-                break;
-            case R.id.bt_switch_fg2:
-                fragmentTransaction = fragmentManager.beginTransaction();
-                fragmentTransaction.replace(R.id.fl_fragment, firstFragment);
                 fragmentTransaction.commit();
                 break;
             default:

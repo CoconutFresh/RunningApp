@@ -58,6 +58,7 @@ public class InitializeRunFragment extends Fragment implements View.OnClickListe
                 fragmentManager = getFragmentManager();
                 fragmentTransaction = fragmentManager.beginTransaction();
                 fragmentTransaction.replace(R.id.maps_rl_fragment, runningFragment);
+                //fragmentTransaction.addToBackStack(null);
                 fragmentTransaction.commit();
                 break;
             default:

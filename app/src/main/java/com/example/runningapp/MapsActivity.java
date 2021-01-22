@@ -10,6 +10,7 @@ import androidx.fragment.app.FragmentTransaction;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Camera;
 import android.graphics.Color;
@@ -60,6 +61,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //setContentView(R.layout.layout_loading_screen);
         setContentView(R.layout.activity_maps); //Connects activity to layout layer
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
@@ -68,35 +70,48 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mapFragment.getMapAsync(this);
 
         initPolyline(); //For line graphing
-
+        enableLocation();
         initFrag(); //Initialize fragments
-
-        //For finding current location of device
-        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-        //Checks for permissions
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                requestPermissions(new String[] {
-                        Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION,
-                        Manifest.permission.INTERNET
-                }, 10);
-                return;
-            }
-        }
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 3000, 0, this);
     }
 
-    @SuppressLint("MissingPermission")
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
 
         //Enables my location layer
-        mMap.setMyLocationEnabled(true);
-        mMap.setLocationSource(this); //Specifically changes the location data from beta fusedlocationproviderclient to chad Android.location.Location
+        enableLocation();
+
+        //mMap.setMyLocationEnabled(true);
+        //mMap.setLocationSource(this); //Specifically changes the location data from beta fusedlocationproviderclient to chad Android.location.Location
     }
 
+    //Checks for permissions
+    private void enableLocation() {
+        //For finding current location of device
+        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+        //Checks for permissions
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            //If permissions are granted
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 3000, 0, this);
+                if(mMap != null) {
+                    mMap.setMyLocationEnabled(true); //Enables my location layer
+                    mMap.setLocationSource(this); //Changes the location data from beta fusedlocationproviderclient to chad Android.location.Location
+                }
+            }
+            //If permissions are not granted
+            else {
+            //if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[] {
+                        Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION,
+                        Manifest.permission.INTERNET
+                }, 10);
+            }
+        }
+    }
+
+    //Initializes lines seen on map while running
     private void initPolyline() {
         //For line graphing
         runRouteOptions = new PolylineOptions();
@@ -107,6 +122,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .color(Color.CYAN);
     }
 
+    //Initializes fragment seen on activity start up
     private void initFrag() {
         //Starts the Maps Activity with the initialize run fragment
         initializeRun = new InitializeRunFragment();
@@ -115,13 +131,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         fragmentTransaction.replace(R.id.maps_rl_fragment, initializeRun).commit();
     }
 
+    //If user gives permissions on activity start up
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch (requestCode) {
             case 10:
                 if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    //TODO: Probably work on the edge cases if the user doesn't give permissions etc.
-                    //startRun();
+                    enableLocation();
                 }
                 return;
             default:
@@ -135,23 +151,25 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         Log.d("trackLog", "Lat is: " + location.getLatitude() + ", "
                 + "Lng is: " + location.getLongitude());
 
-        mapLocationListener.onLocationChanged(location); //This is where it switches poopy default fusedLocationProviderClient to Android.location.Location
+        //mapLocationListener.onLocationChanged(location); //This is where it switches poopy default fusedLocationProviderClient to Android.location.Location
         LatLng curLoc = new LatLng(location.getLatitude(), location.getLongitude());
 
+        //TODO: Fix bug that has to do with pressing the start button too soon before initCamera finishes
         //In charge of how map is displayed to the runner (Running vs. Not Running)
-        if (isRunning) { //User clicks start run
+        if (!isRunning && !initialState) { //Map shows users location before run starts
+            mMap.animateCamera(CameraUpdateFactory.newLatLng(curLoc));
+            pastLoc = location;
+        }
+        else if (isRunning && !initialState) { //User clicks start run
             //Testing distance algorithm
             Log.d("dist", "Distance Traveled: " + getDistanceKm(pastLoc, location));
-            totalDistRan += getDistanceKm(pastLoc, location) + 5; //Adds to the total distance ran
+            totalDistRan += getDistanceKm(pastLoc, location); //Adds to the total distance ran
             pastLoc = location; //Updates the past location to the current location
             updateMapVisuals(curLoc);
         }
-        else if (!isRunning && initialState) { //Initial map preparations before the user starts run
+        else if (initialState) { //Initial map preparations before the user starts run
             initCamera(curLoc);
-        }
-        else if (!isRunning && !initialState) { //Map shows users location before run starts
-            mMap.animateCamera(CameraUpdateFactory.newLatLng(curLoc));
-            pastLoc = location;
+            initialState = false;
         }
     }
 
@@ -166,6 +184,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.animateCamera(CameraUpdateFactory.newLatLng(location));
     }
 
+    //Initializes camera on Activity start up
     private void initCamera(LatLng curLoc) {
         initialCamera = new CameraPosition.Builder()
                 .target(curLoc)
@@ -173,13 +192,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .bearing(0)
                 .tilt(0)
                 .build();
+        //mMap.animateCamera(CameraUpdateFactory.zoomTo(18));
 
         mMap.animateCamera(CameraUpdateFactory.newCameraPosition(initialCamera));
-        initialState = false;
     }
 
     //Haversine formula for calculating distance between two sets of LatLng
     private double getDistanceKm(@NotNull Location point1,@NotNull Location point2) {
+        if(point1 == null)
+            return 0;
         int earthRadius = 6371;
         double lat1 = point1.getLatitude(), lat2 = point2.getLatitude();
 
@@ -196,12 +217,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         return d;
     }
 
-    private double deg2Rad(double deg) {
+    private double deg2Rad(double deg) { //Helper function for getDistanceKm()
         return deg * (Math.PI/180);
     }
 
+    //Activity to Fragment communication methods
     protected double getTotalDist() {
         return totalDistRan;
+    }
+
+    protected boolean getInitialState() {
+        return initialState;
     }
 
     //Necessary methods in order to change the locationSource to chad Android.location.Location
@@ -224,5 +250,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onStopRunPressed(boolean isRunning) { //Stops run when bt_stopRun in RunningFragment is pressed
         this.isRunning = isRunning;
+    }
+
+    //Makes sure that if the user hits the back button, we no longer track their location
+    @SuppressLint("MissingPermission")
+    @Override
+    public void onBackPressed() {
+        locationManager.removeUpdates(this);
+        locationManager = null;
+        //mMap.setMyLocationEnabled(false);
+        startActivity(new Intent(this, HomePage.class));
+        finish();
+        super.onBackPressed();
     }
 }

@@ -22,14 +22,17 @@ import java.util.Map;
 public class RunningFragment extends Fragment implements View.OnClickListener {
 
     View view;
-    TextView tv_totalDist;
     Button bt_stopRun;
+
     Chronometer timer;
+    TextView tv_totalDist;
+    double totalDist = 0;
+
     Fragment initializeRun;
     FragmentManager fragmentManager;
     FragmentTransaction fragmentTransaction;
+
     RunningListener listener;
-    double totalDist = 0;
     Handler handler;
     MapsActivity activity;
 
@@ -68,6 +71,7 @@ public class RunningFragment extends Fragment implements View.OnClickListener {
         return view;
     }
 
+    //Updates distance text view every second
     private void updateDistance() {
         handler = new Handler();
         handler.postDelayed(new Runnable() {
@@ -89,6 +93,7 @@ public class RunningFragment extends Fragment implements View.OnClickListener {
                 fragmentManager = getFragmentManager();
                 fragmentTransaction = fragmentManager.beginTransaction();
                 fragmentTransaction.replace(R.id.maps_rl_fragment, initializeRun);
+                //fragmentTransaction.addToBackStack(null);
                 fragmentTransaction.commit();
                 break;
             default:
