@@ -9,59 +9,49 @@ import androidx.fragment.app.FragmentTransaction;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Camera;
 import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Looper;
 import android.util.Log;
-import android.view.View;
-import android.widget.Button;
-import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.GoogleMapOptions;
 import com.google.android.gms.maps.LocationSource;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
-import com.google.android.gms.maps.model.Cap;
 import com.google.android.gms.maps.model.JointType;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.maps.model.RoundCap;
-import com.google.android.gms.maps.model.SquareCap;
 import com.google.firebase.database.annotations.NotNull;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener, LocationSource, RunningFragment.RunningListener, InitializeRunFragment.InitRunListener {
+
     private GoogleMap mMap;
     LocationManager locationManager;
     PolylineOptions runRouteOptions;
     CameraPosition initialCamera;
+
     Fragment initializeRun;
     FragmentManager fragmentManager;
     FragmentTransaction fragmentTransaction;
+
     Location pastLoc;
     double totalDistRan = 0; //In km for now
 
     private OnLocationChangedListener mapLocationListener = null;
 
-    boolean isRunning = false, initialState = true;
+    boolean isRunning = false, initialState = true, pause = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //setContentView(R.layout.layout_loading_screen);
         setContentView(R.layout.activity_maps); //Connects activity to layout layer
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
@@ -154,18 +144,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         //mapLocationListener.onLocationChanged(location); //This is where it switches poopy default fusedLocationProviderClient to Android.location.Location
         LatLng curLoc = new LatLng(location.getLatitude(), location.getLongitude());
 
-        //TODO: Fix bug that has to do with pressing the start button too soon before initCamera finishes
         //In charge of how map is displayed to the runner (Running vs. Not Running)
         if (!isRunning && !initialState) { //Map shows users location before run starts
             mMap.animateCamera(CameraUpdateFactory.newLatLng(curLoc));
             pastLoc = location;
         }
-        else if (isRunning && !initialState) { //User clicks start run
+        else if (isRunning && !initialState && !pause) { //User clicks start run
             //Testing distance algorithm
             Log.d("dist", "Distance Traveled: " + getDistanceKm(pastLoc, location));
             totalDistRan += getDistanceKm(pastLoc, location); //Adds to the total distance ran
             pastLoc = location; //Updates the past location to the current location
-            updateMapVisuals(curLoc);
+
+            //TODO: Concerning pause button, the trail will probably connect where the person paused, gotta unchain the location point from where they unpause!
+            updateTrail(curLoc);
         }
         else if (initialState) { //Initial map preparations before the user starts run
             initCamera(curLoc);
@@ -174,7 +165,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     //For tracking, in charge of following device and drawing lines between past locations with present
-    private void updateMapVisuals(LatLng location) {
+    private void updateTrail(LatLng location) {
 
         //TODO: Make Polyline look nicer
 
@@ -241,18 +232,25 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         this.mapLocationListener = null;
     }
 
-    //These two methods are for interacting with the Running and InitRun fragments
+    //Method for interacting with InitializeRunFragment
     @Override
     public void onStartRunPressed(boolean isRunning) { //Starts run when bt_startRun in initializeRunFragment is pressed
         this.isRunning = isRunning;
-    }
+    } //Start Button
+
+    //Methods for interacting with RunningFragment
+    @Override
+    public void onPauseRunPressed(boolean pause) {
+        this.pause = pause;
+    } //Pause Button
 
     @Override
     public void onStopRunPressed(boolean isRunning) { //Stops run when bt_stopRun in RunningFragment is pressed
         this.isRunning = isRunning;
-    }
+    } //Stop Button
 
     //Makes sure that if the user hits the back button, we no longer track their location
+    //TODO: Work on proper permission etiquette
     @SuppressLint("MissingPermission")
     @Override
     public void onBackPressed() {
