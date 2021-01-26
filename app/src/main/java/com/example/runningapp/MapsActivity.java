@@ -18,6 +18,9 @@ import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.ViewGroup;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -38,6 +41,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     PolylineOptions runRouteOptions;
     CameraPosition initialCamera;
 
+    SupportMapFragment mapFragment;
     Fragment initializeRun;
     FragmentManager fragmentManager;
     FragmentTransaction fragmentTransaction;
@@ -49,13 +53,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     boolean isRunning = false, initialState = true, pause = false;
 
+    RelativeLayout maps_rl_fragment;
+    final int FULLSCREEN = 8, SPLITSCREEN = 3;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps); //Connects activity to layout layer
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+        mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
@@ -74,6 +81,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         //mMap.setMyLocationEnabled(true);
         //mMap.setLocationSource(this); //Specifically changes the location data from beta fusedlocationproviderclient to chad Android.location.Location
+    }
+
+    //Initializes lines seen on map while running
+    private void initPolyline() {
+        //For line graphing
+        runRouteOptions = new PolylineOptions();
+        runRouteOptions.clickable(false)
+                .width(20)
+                .startCap(new RoundCap())
+                .jointType(JointType.ROUND)
+                .color(Color.CYAN);
     }
 
     //Checks for permissions
@@ -99,17 +117,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 }, 10);
             }
         }
-    }
-
-    //Initializes lines seen on map while running
-    private void initPolyline() {
-        //For line graphing
-        runRouteOptions = new PolylineOptions();
-        runRouteOptions.clickable(false)
-                .width(20)
-                .startCap(new RoundCap())
-                .jointType(JointType.ROUND)
-                .color(Color.CYAN);
     }
 
     //Initializes fragment seen on activity start up
@@ -158,6 +165,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             //TODO: Concerning pause button, the trail will probably connect where the person paused, gotta unchain the location point from where they unpause!
             updateTrail(curLoc);
         }
+        else if (pause) { //
+            pastLoc = null;
+        }
         else if (initialState) { //Initial map preparations before the user starts run
             initCamera(curLoc);
             initialState = false;
@@ -173,6 +183,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         runRouteOptions.add(location);
         mMap.addPolyline(runRouteOptions);
         mMap.animateCamera(CameraUpdateFactory.newLatLng(location));
+
+        //TODO:Add a way to make a new polyline object after pause in order to break the line into segments
     }
 
     //Initializes camera on Activity start up
@@ -236,18 +248,48 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onStartRunPressed(boolean isRunning) { //Starts run when bt_startRun in initializeRunFragment is pressed
         this.isRunning = isRunning;
+
+        viewChanger(FULLSCREEN);
     } //Start Button
 
     //Methods for interacting with RunningFragment
     @Override
     public void onPauseRunPressed(boolean pause) {
         this.pause = pause;
+        if(pause) {
+            viewChanger(SPLITSCREEN);
+        }
+        else {
+            viewChanger(FULLSCREEN);
+        }
     } //Pause Button
 
     @Override
     public void onStopRunPressed(boolean isRunning) { //Stops run when bt_stopRun in RunningFragment is pressed
         this.isRunning = isRunning;
+        viewChanger(3);
     } //Stop Button
+
+    //Method for showing/hiding map and changing size of fragments
+    private void viewChanger(int weight) {
+        LinearLayout.LayoutParams param = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, weight);
+
+        if(weight == FULLSCREEN) { //We want the stats to be fullscreen so we hide map
+            fragmentManager.beginTransaction()
+                    .setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right)
+                    .hide(mapFragment)
+                    .commit();
+        }
+        else if (weight == SPLITSCREEN){ //We want a split screen with the map, so we show map
+            fragmentManager.beginTransaction()
+                    .setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right)
+                    .show(mapFragment)
+                    .commit();
+        }
+
+        maps_rl_fragment = findViewById(R.id.maps_rl_fragment);
+        maps_rl_fragment.setLayoutParams(param);
+    }
 
     //Makes sure that if the user hits the back button, we no longer track their location
     //TODO: Work on proper permission etiquette

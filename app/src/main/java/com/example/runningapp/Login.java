@@ -52,7 +52,7 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.login);
+        setContentView(R.layout.activity_login);
 
         createGRequest();
 
@@ -99,8 +99,8 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
                 startActivity(new Intent(this, ForgotPassword.class));
                 break;
             case R.id.lg_button:
-                //validate(username.getText().toString(), password.getText().toString()); //temporary
-                login();
+                //login();
+                startActivity(new Intent(Login.this, HomePage.class));
                 break;
             case R.id.google_button:
                 signInGoogle();
@@ -209,13 +209,4 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
             }
         });
     }
-    //Garbage method for testing. Will delete later. Left it in case shit goes wrong with Firebase
-    /*private void validate(String un, String pw) {
-        if(un.equals("test") && pw.equals("test")) {
-
-            //Switches over control of the app to the next activity
-            startActivity(new Intent(this, HomePage.class));
-            finish(); //Makes it so that the user can't use the back button to return to this page.
-        }
-    }*/
 }
