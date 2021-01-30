@@ -128,10 +128,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     //In charge of swapping fragments within the activity
     private void fragmentManager(int layout, Fragment fragment) {
         //Starts the Maps Activity with the initialize run fragment
-
+        Fragment prev;
         fragmentManager = getSupportFragmentManager();
-        fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.replace(layout, fragment).commit();
+        if(layout == R.id.maps_rl_fragment) {
+            prev = fragmentManager.findFragmentById(R.id.maps_rl_fragment);
+        }
+        else {
+            prev = fragmentManager.findFragmentById(R.id.maps_fl_buttonPlacement);
+        }
+        if (prev != null) {
+            fragmentTransaction = fragmentManager.beginTransaction();
+            fragmentTransaction.setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
+            fragmentTransaction.remove(prev).commitAllowingStateLoss();
+        }
+        FragmentTransaction addTransaction = fragmentManager.beginTransaction();
+        addTransaction.setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
+        addTransaction.addToBackStack(null);
+        addTransaction.add(layout, fragment).commitAllowingStateLoss();
     }
 
     //If user gives permissions on activity start up
