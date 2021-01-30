@@ -5,21 +5,32 @@
     android:layout_height="match_parent"
     tools:context=".InitializeRunFragment">
 
-    <TextView
-        android:id="@+id/tv_initializeRun"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:id="@+id/lin_mode_streak"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
+        android:orientation="horizontal"
         android:layout_centerVertical="true"
-        android:text="Initialize Run"
-        android:textSize="30dp" />
+        android:divider="@color/black"
+        android:showDividers="middle" >
 
-    <Button
-        android:id="@+id/bt_startRun"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_below="@+id/tv_initializeRun"
-        android:text="Start"/>
+        <Spinner
+            android:id="@+id/spinner_mode"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:textAlignment="center"
+            android:entries="@array/modes"
+            android:gravity="center"/>
+
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="Streak"
+            android:textSize="35dp"
+            android:gravity="center"/>
+    </LinearLayout>
 
 </RelativeLayout>

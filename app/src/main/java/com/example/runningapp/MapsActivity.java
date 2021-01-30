@@ -33,7 +33,7 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.maps.model.RoundCap;
 import com.google.firebase.database.annotations.NotNull;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener, LocationSource, RunningFragment.RunningListener, InitializeRunFragment.InitRunListener {
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener, LocationSource, StartButtonFragment.StartButtonListener, PauseButtonFragment.PauseButtonListener, Resume_StopFragment.Resume_StopListener {
 
     private GoogleMap mMap;
     LocationManager locationManager;
@@ -41,8 +41,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     PolylineOptions runRouteOptions;
     CameraPosition initialCamera;
 
+    Fragment initializeRunFragment, startButtonFragment, runningFragment, pauseButtonFragment, resume_stopFragment;
     SupportMapFragment mapFragment;
-    Fragment initializeRun;
     FragmentManager fragmentManager;
     FragmentTransaction fragmentTransaction;
 
@@ -54,10 +54,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     boolean isRunning = false, initialState = true, pause = false;
 
     RelativeLayout maps_rl_fragment;
-    final int FULLSCREEN = 8, SPLIT_SCREEN = 3;
+    final float FULLSCREEN = 7f, SPLIT_SCREEN = 1.5f;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        initializeRunFragment = new InitializeRunFragment();
+        startButtonFragment = new StartButtonFragment();
+        runningFragment = new RunningFragment();
+        pauseButtonFragment = new PauseButtonFragment();
+        resume_stopFragment = new Resume_StopFragment();
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps); //Connects activity to layout layer
 
@@ -68,7 +74,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         initPolyline(); //For line graphing
         enableLocation();
-        initFrag(); //Initialize fragments
+        //Initialize fragments
+        fragmentManager(R.id.maps_rl_fragment, initializeRunFragment);
+        fragmentManager(R.id.maps_fl_buttonPlacement, startButtonFragment);
     }
 
     @Override
@@ -117,13 +125,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
-    //Initializes fragment seen on activity start up
-    private void initFrag() {
+    //In charge of swapping fragments within the activity
+    private void fragmentManager(int layout, Fragment fragment) {
         //Starts the Maps Activity with the initialize run fragment
-        initializeRun = new InitializeRunFragment();
+
         fragmentManager = getSupportFragmentManager();
         fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.replace(R.id.maps_rl_fragment, initializeRun).commit();
+        fragmentTransaction.replace(layout, fragment).commit();
     }
 
     //If user gives permissions on activity start up
@@ -158,12 +166,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             //Testing distance algorithm
             double dist = getDistanceKm(pastLoc, curLoc);
             Log.d("dist", "Distance Traveled: " + dist);
-            if (dist > 0.01) { //To account for gps inaccuracies TODO: Haven't actually tested this lmao
+            if (dist > 0.007) { //To account for gps inaccuracies TODO: Haven't actually tested this lmao
                 totalDistRan += dist; //Adds to the total distance ran
                 pastLoc = curLoc; //Updates the past location to the current location
+                updateTrail(curLoc);
+                mMap.animateCamera(CameraUpdateFactory.newLatLng(curLoc));
             }
             //TODO: Concerning pause button, the trail will probably connect where the person paused, gotta unchain the location point from where they unpause!
-            updateTrail(curLoc);
+
         }
         else if (pause) { //
             pastLoc = null;
@@ -182,7 +192,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         //Log.d("polylineDebug", "This is being called");
         runRouteOptions.add(location);
         runRoute = mMap.addPolyline(runRouteOptions);
-        mMap.animateCamera(CameraUpdateFactory.newLatLng(location));
+        //mMap.animateCamera(CameraUpdateFactory.newLatLng(location));
 
         //TODO:Add a way to make a new polyline object after pause in order to break the line into segments
     }
@@ -196,7 +206,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .tilt(0)
                 .build();
 
-        mMap.animateCamera(CameraUpdateFactory.newCameraPosition(initialCamera));
+        mMap.animateCamera(CameraUpdateFactory.newCameraPosition(initialCamera), 500, null);
     }
 
     //Haversine formula for calculating distance between two sets of LatLng
@@ -243,34 +253,42 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         this.mapLocationListener = null;
     }
 
-    //Method for interacting with InitializeRunFragment
+    //Listeners for button fragments
     @Override
-    public void onStartRunPressed(boolean isRunning) { //Starts run when bt_startRun in initializeRunFragment is pressed
-        this.isRunning = isRunning;
-
+    public void onStartPressed(boolean startPressed) { //start fragment
+        isRunning = startPressed;
         viewChanger(FULLSCREEN);
-    } //Start Button
+        fragmentManager(R.id.maps_rl_fragment, runningFragment);
+        fragmentManager(R.id.maps_fl_buttonPlacement, pauseButtonFragment);
+    }
 
-    //Methods for interacting with RunningFragment
     @Override
-    public void onPauseRunPressed(boolean pause) {
+    public void onPausePressed(boolean pause) { //pause fragment
         this.pause = pause;
-        if(pause) {
-            viewChanger(SPLIT_SCREEN);
-        }
-        else {
-            viewChanger(FULLSCREEN);
-        }
-    } //Pause Button
+        fragmentManager(R.id.maps_fl_buttonPlacement, resume_stopFragment);
+        RunningFragment.timerPause(pause);
+        viewChanger(SPLIT_SCREEN);
+    }
+
+    //resume/stop fragment
+    @Override
+    public void onResumePressed(boolean pause) {
+        this.pause = pause;
+        fragmentManager(R.id.maps_fl_buttonPlacement, pauseButtonFragment);
+        RunningFragment.timerPause(pause);
+        viewChanger(FULLSCREEN);
+    }
 
     @Override
-    public void onStopRunPressed(boolean isRunning) { //Stops run when bt_stopRun in RunningFragment is pressed
-        this.isRunning = isRunning;
+    public void onStopPressed(boolean stop) {
+        isRunning = false;
+        fragmentManager(R.id.maps_fl_buttonPlacement, startButtonFragment);
+        fragmentManager(R.id.maps_rl_fragment, initializeRunFragment);
         viewChanger(SPLIT_SCREEN);
-    } //Stop Button
+    }
 
     //Method for showing/hiding map and changing size of fragments
-    private void viewChanger(int weight) {
+    private void viewChanger(float weight) {
         //Changes the weight of the relative layout embedded in the linear layout
         LinearLayout.LayoutParams param = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, weight);
 
@@ -300,4 +318,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         finish();
         super.onBackPressed();
     }
+
+
 }

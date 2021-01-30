@@ -43,39 +43,4 @@
 
     </LinearLayout>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_below="@id/lin_data"
-        android:paddingLeft="4.0dp"
-        android:paddingRight="4.0dp"
-        android:paddingTop="5.0dp"
-        android:paddingBottom="1.0dp">
-
-        <Button
-            android:id="@+id/bt_pauseRun"
-            android:layout_width="0dip"
-            android:layout_height="wrap_content"
-            android:layout_marginRight="10dp"
-            android:layout_below="@+id/lin_data"
-            android:layout_centerHorizontal="true"
-            android:text="Pause"
-            android:layout_weight="1.0"/>
-
-        <Button
-            android:id="@+id/bt_stopRun"
-            android:layout_width="0dip"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="10dp"
-            android:layout_below="@+id/lin_data"
-            android:layout_centerHorizontal="true"
-            android:text="Stop"
-            android:layout_weight="1.0"/>
-
-    </LinearLayout>
-
-
-
-
 </RelativeLayout>

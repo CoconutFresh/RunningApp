@@ -10,39 +10,25 @@ import androidx.fragment.app.FragmentTransaction;
 
 import android.os.Handler;
 import android.os.SystemClock;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Chronometer;
 import android.widget.TextView;
+import android.widget.Toast;
 
-public class RunningFragment extends Fragment implements View.OnClickListener {
+public class RunningFragment extends Fragment {
+
 
     View view;
-    Button bt_stopRun;
-    Button bt_pauseRun;
-
-    Chronometer timer;
-    long whenTimeStopped;
+    private static long whenTimeStopped;
+    private static Chronometer timer;
     TextView tv_totalDist;
     double totalDist = 0;
 
-    Fragment initializeRun;
-    FragmentManager fragmentManager;
-    FragmentTransaction fragmentTransaction;
-
-    RunningListener listener;
     Handler handler;
     MapsActivity activity;
-
-    boolean isPaused = false;
-
-    public interface RunningListener {
-        void onStopRunPressed(boolean isRunning);
-        void onPauseRunPressed(boolean pause);
-    }
 
     public RunningFragment() {
         // Required empty public constructor
@@ -64,17 +50,10 @@ public class RunningFragment extends Fragment implements View.OnClickListener {
         tv_totalDist.setText(String.valueOf(totalDist));
         updateDistance();
 
-        //Setting up button listeners
-        bt_stopRun = view.findViewById(R.id.bt_stopRun);
-        bt_pauseRun = view.findViewById(R.id.bt_pauseRun);
-        bt_pauseRun.setOnClickListener(this);
-        bt_stopRun.setOnClickListener(this);
-
         //Setting up stopwatch
         timer = view.findViewById(R.id.cm_timer);
         timer.start();
 
-        initializeRun = new InitializeRunFragment();
         return view;
     }
 
@@ -91,55 +70,14 @@ public class RunningFragment extends Fragment implements View.OnClickListener {
         }, 0);
     }
 
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.bt_stopRun:
-                //Log.d("timerLog", timer.getText().toString());
-                listener.onStopRunPressed(false);
-
-                fragmentManager = getFragmentManager();
-                fragmentTransaction = fragmentManager.beginTransaction();
-                fragmentTransaction.replace(R.id.maps_rl_fragment, initializeRun);
-                //fragmentTransaction.addToBackStack(null);
-                fragmentTransaction.commit();
-                break;
-            case R.id.bt_pauseRun:
-                if(!isPaused) {
-                    isPaused = true;
-                    listener.onPauseRunPressed(true);
-                    whenTimeStopped = timer.getBase() - SystemClock.elapsedRealtime();
-                    timer.stop();
-                    bt_pauseRun.setText("Resume");
-                }
-                else {
-                    isPaused = false;
-                    listener.onPauseRunPressed(false);
-                    timer.setBase(SystemClock.elapsedRealtime() + whenTimeStopped);
-                    timer.start();
-                    bt_pauseRun.setText("Pause");
-                }
-                break;
-            default:
-                break;
-        }
-    }
-
-    @Override
-    public void onAttach(@NonNull Context context) {
-        super.onAttach(context);
-        if(context instanceof RunningListener) {
-            listener = (RunningListener) context;
+    public static void timerPause(boolean pause) {
+        if(pause) {
+            whenTimeStopped = timer.getBase() - SystemClock.elapsedRealtime();
+            timer.stop();
         }
         else {
-            throw new RuntimeException(context.toString()
-                + "must implement RunningListener");
+            timer.setBase(SystemClock.elapsedRealtime() + whenTimeStopped);
+            timer.start();
         }
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        listener = null;
     }
 }

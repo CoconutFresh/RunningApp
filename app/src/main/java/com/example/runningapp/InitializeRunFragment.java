@@ -11,20 +11,16 @@ import androidx.fragment.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.Spinner;
+import android.widget.Toast;
 
-public class InitializeRunFragment extends Fragment implements View.OnClickListener {
+public class InitializeRunFragment extends Fragment  {
 
     View view;
-    Button bt_startRun;
-    Fragment runningFragment;
-    FragmentManager fragmentManager;
-    FragmentTransaction fragmentTransaction;
-    private InitRunListener listener;
-
-    public interface InitRunListener {
-        void onStartRunPressed(boolean isRunning);
-    }
+    private Spinner spinnerMode;
 
     public InitializeRunFragment() {
         // Required empty public constructor
@@ -40,47 +36,26 @@ public class InitializeRunFragment extends Fragment implements View.OnClickListe
                              Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_initialize_run, container, false);
 
-        bt_startRun = view.findViewById(R.id.bt_startRun);
-        bt_startRun.setOnClickListener(this);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), R.layout.spinner_item, getResources().getStringArray(R.array.modes));
+        spinnerMode = view.findViewById(R.id.spinner_mode);
+        spinnerMode.setBackground(null);
 
-        runningFragment = new RunningFragment();
+        spinnerMode.setAdapter(adapter);
+
+
+        spinnerMode.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                //TODO: Save the selection into a string to later be stored into a run session object
+                Toast.makeText(getActivity(), spinnerMode.getSelectedItem().toString() + " selected", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
 
         return view;
-    }
-
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.bt_startRun:
-                listener.onStartRunPressed(true);
-
-                //Switches from InitializeRun to Running
-                fragmentManager = getFragmentManager();
-                fragmentTransaction = fragmentManager.beginTransaction();
-                fragmentTransaction.replace(R.id.maps_rl_fragment, runningFragment);
-                //fragmentTransaction.addToBackStack(null);
-                fragmentTransaction.commit();
-                break;
-            default:
-                break;
-        }
-    }
-
-    @Override
-    public void onAttach(@NonNull Context context) {
-        super.onAttach(context);
-        if(context instanceof InitRunListener) {
-            listener = (InitRunListener) context;
-        }
-        else {
-            throw new RuntimeException(context.toString()
-                + "must implement initRunListener");
-        }
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        listener = null;
     }
 }
