@@ -19,6 +19,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -46,8 +47,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     FragmentManager fragmentManager;
     FragmentTransaction fragmentTransaction;
 
-    LatLng pastLoc;
-    double totalDistRan = 0; //In km for now
+    Location pastLoc;
+    float totalDistRan = 0; //In km for now
 
     private OnLocationChangedListener mapLocationListener = null;
 
@@ -76,7 +77,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         enableLocation();
         //Initialize fragments
         fragmentManager(R.id.maps_rl_fragment, initializeRunFragment);
-        fragmentManager(R.id.maps_fl_buttonPlacement, startButtonFragment);
+        //fragmentManager(R.id.maps_fl_buttonPlacement, startButtonFragment);
     }
 
     @Override
@@ -108,7 +109,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             //If permissions are granted
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 3000, 0, this);
+                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 500, 1, this); //In charge of the frequency that the app checks for distance
                 if(mMap != null) {
                     mMap.setMyLocationEnabled(true); //Enables my location layer
                     mMap.setLocationSource(this); //Changes the location data from beta fusedlocationproviderclient to chad Android.location.Location
@@ -173,26 +174,31 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         //In charge of how map is displayed to the runner (Running vs. Not Running)
         if (!isRunning && !initialState) { //Map shows users location before run starts
             mMap.animateCamera(CameraUpdateFactory.newLatLng(curLoc));
-            pastLoc = curLoc;
+            pastLoc = location;
         }
         else if (isRunning && !initialState && !pause) { //User clicks start run
             //Testing distance algorithm
-            double dist = getDistanceKm(pastLoc, curLoc);
+            //double dist = getDistanceKm(pastLoc, curLoc);
+            float dist = pastLoc.distanceTo(location);
+
             Log.d("dist", "Distance Traveled: " + dist);
-            if (dist > 0.007) { //To account for gps inaccuracies TODO: Haven't actually tested this lmao
+
                 totalDistRan += dist; //Adds to the total distance ran
-                pastLoc = curLoc; //Updates the past location to the current location
+                RunningFragment.updateDistance(totalDistRan);
+
+                pastLoc = location; //Updates the past location to the current location
                 updateTrail(curLoc);
                 mMap.animateCamera(CameraUpdateFactory.newLatLng(curLoc));
-            }
-            //TODO: Concerning pause button, the trail will probably connect where the person paused, gotta unchain the location point from where they unpause!
 
+            //TODO: Concerning pause button, the trail will probably connect where the person paused, gotta unchain the location point from where they unpause!
         }
         else if (pause) { //
             pastLoc = null;
         }
         else if (initialState) { //Initial map preparations before the user starts run
             initCamera(curLoc);
+            pastLoc = location;
+            fragmentManager(R.id.maps_fl_buttonPlacement, startButtonFragment); //Waits for camera and location to be initialized before allowed user to click start
             initialState = false;
         }
     }
@@ -222,7 +228,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.animateCamera(CameraUpdateFactory.newCameraPosition(initialCamera), 500, null);
     }
 
-    //Haversine formula for calculating distance between two sets of LatLng
+
+
+
+
+
+
+/*    //Haversine formula for calculating distance between two sets of LatLng
     private double getDistanceKm(@NotNull LatLng point1,@NotNull LatLng point2) {
         if(point1 == null)
             return 0;
@@ -244,16 +256,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private double deg2Rad(double deg) { //Helper function for getDistanceKm()
         return deg * (Math.PI/180);
-    }
-
-    //Activity to Fragment communication methods
-    protected double getTotalDist() {
-        return totalDistRan;
-    }
-
-    protected boolean getInitialState() {
-        return initialState;
-    }
+    }*/
 
     //Necessary methods in order to change the locationSource to chad Android.location.Location
     @Override
@@ -281,6 +284,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         fragmentManager(R.id.maps_fl_buttonPlacement, resume_stopFragment);
         RunningFragment.timerPause(pause);
         viewChanger(SPLIT_SCREEN);
+    }
+
+    @Override
+    public void onMapShownPressed(boolean mapShown) {
+        if(mapShown) {
+            viewChanger(SPLIT_SCREEN);
+        }
+        else {
+            viewChanger(FULLSCREEN);
+        }
     }
 
     //resume/stop fragment

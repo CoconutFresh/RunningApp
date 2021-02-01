@@ -5,42 +5,106 @@
     android:layout_height="match_parent"
     tools:context=".RunningFragment">
 
-    <TextView
-        android:id="@+id/tv_Running"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_above="@id/lin_data"
-        android:text="Running"
-        android:textSize="30dp" />
-
     <LinearLayout
         android:id="@+id/lin_data"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
+        android:layout_height="175dp"
+        android:paddingTop="20dp"
+        android:paddingBottom="20dp"
         android:orientation="horizontal"
-        android:paddingLeft="4.0dp"
-        android:paddingRight="4.0dp"
-        android:paddingTop="5.0dp"
-        android:paddingBottom="1.0dp"
-        android:gravity="center_horizontal">
+        android:weightSum="2"
+        android:divider="@color/green"
+        android:showDividers="middle">
 
-        <Chronometer
-            android:id="@+id/cm_timer"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/tv_Running"
-            android:layout_toLeftOf="@id/tv_totalDist"
-            android:textSize="25dp" />
+        <RelativeLayout
+            android:id="@+id/lin_time"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1">
 
-        <TextView
-            android:id="@+id/tv_totalDist"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="25dp"
-            android:text="0.00" />
+            <TextView
+                android:id="@+id/tv_time"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="5dp"
+                android:layout_weight="1"
+                android:text="Time"
+                android:textSize="20dp"
+                android:textAlignment="center"
+                android:textColor="@color/black"
+                android:layout_alignParentTop="true"/>
+
+            <Chronometer
+                android:id="@+id/cm_timer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="5dp"
+                android:layout_centerVertical="true"
+                android:textSize="35dp"
+                android:textAlignment="center"
+                android:textColor="@color/black"
+                android:layout_weight="1" />
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/lin_dist"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            >
+
+            <TextView
+                android:id="@+id/tv_dist"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="5dp"
+                android:text="Distance"
+                android:textSize="20dp"
+                android:textAlignment="center"
+                android:textColor="@color/black"
+                android:layout_alignParentTop="true"/>
+
+            <TextView
+                android:id="@+id/tv_totalDist"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="5dp"
+                android:layout_centerVertical="true"
+                android:textSize="35dp"
+                android:textAlignment="center"
+                android:textColor="@color/black"
+                android:text="0.00"/>
+
+        </RelativeLayout>
 
     </LinearLayout>
+
+    <RelativeLayout
+        android:id="@+id/rl_avgPace"
+        android:layout_width="match_parent"
+        android:layout_height="175dp"
+        android:layout_below="@+id/lin_data"
+        android:background="@drawable/custom_border">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Average Pace"
+            android:textSize="20dp"
+            android:textAlignment="center"
+            android:textColor="@color/black"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="0:00"
+            android:textSize="35dp"
+            android:textAlignment="center"
+            android:textColor="@color/black"
+
+            android:layout_centerVertical="true"/>
+
+    </RelativeLayout>
 
 </RelativeLayout>

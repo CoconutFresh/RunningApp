@@ -8,29 +8,51 @@
     <LinearLayout
         android:id="@+id/lin_mode_streak"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="150dp"
         android:orientation="horizontal"
         android:layout_centerVertical="true"
-        android:divider="@color/black"
+        android:divider="@color/green"
         android:showDividers="middle" >
 
-        <Spinner
-            android:id="@+id/spinner_mode"
-            android:layout_width="wrap_content"
+        <RelativeLayout
+            android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:textAlignment="center"
-            android:entries="@array/modes"
-            android:gravity="center"/>
+            android:layout_weight="1">
 
+            <TextView
+                android:id="@+id/tv_mode"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="15dp"
+                android:paddingRight="25dp"
+                android:layout_centerVertical="true"
+                android:text="Mode:"
+                android:textSize="20dp"
+                android:textColor="@color/black"/>
+
+
+            <Spinner
+                android:id="@+id/spinner_mode"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_toRightOf="@+id/tv_mode"
+                android:textAlignment="center"
+                android:entries="@array/modes"/>
+
+
+        </RelativeLayout>
 
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
+            android:paddingLeft="15dp"
+            android:paddingRight="25dp"
             android:layout_weight="1"
-            android:text="Streak"
-            android:textSize="35dp"
-            android:gravity="center"/>
+            android:text="Streak:"
+            android:textSize="20dp"
+            android:textColor="@color/black"
+            android:gravity="center_vertical"/>
     </LinearLayout>
 
 </RelativeLayout>

@@ -10,14 +10,17 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 
 public class PauseButtonFragment extends Fragment implements View.OnClickListener{
     Button pauseRun;
+    ImageButton showMap;
+    boolean mapShown = false;
     private PauseButtonListener listener;
-    boolean isPaused = false;
 
     public interface PauseButtonListener {
         void onPausePressed(boolean pause);
+        void onMapShownPressed(boolean mapShown);
     }
 
     public PauseButtonFragment() {
@@ -34,8 +37,12 @@ public class PauseButtonFragment extends Fragment implements View.OnClickListene
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_pause_button, container, false);
+
+        //Initializing button listeners
         pauseRun = view.findViewById(R.id.bt_pauseRun);
+        showMap = view.findViewById(R.id.bt_map);
         pauseRun.setOnClickListener(this);
+        showMap.setOnClickListener(this);
 
         return view;
     }
@@ -46,6 +53,16 @@ public class PauseButtonFragment extends Fragment implements View.OnClickListene
             case R.id.bt_pauseRun:
                 listener.onPausePressed(true);
                 break;
+            case R.id.bt_map:
+                if(!mapShown) {
+                    mapShown = true;
+                }
+                else {
+                    mapShown = false;
+                }
+                listener.onMapShownPressed(mapShown);
+                /*mapShown = false ? true :  false; //toggle
+                listener.onMapShownPressed(mapShown);*/
             default:
                 break;
         }

@@ -13,4 +13,18 @@
         android:layout_centerHorizontal="true"
         android:text="Pause"/>
 
+    <ImageButton
+        android:id="@+id/bt_map"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:padding="8dp"
+        android:layout_centerVertical="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="15dp"
+        android:scaleType="fitCenter"
+        android:background="@drawable/round_button"
+        android:src="@mipmap/show_map_icon"
+        android:gravity="center_vertical|center_horizontal"
+        />
+
 </RelativeLayout>
