@@ -1,10 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".HomePage">
+    tools:context=".HomePage"
+    android:orientation="vertical"
+    android:weightSum="8">
+
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="7">
 
     <TextView
         android:layout_width="wrap_content"
@@ -14,40 +22,47 @@
         android:textSize="50dp"
         android:text="TODO: Home"
         android:id="@+id/test" />
+    </RelativeLayout>
 
-    <Button
-        android:id="@+id/bt_fragment_1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/bt_test"
-        android:layout_marginLeft="60dp"
-        android:text="Fragment 1"
-        />
-
-    <Button
-        android:id="@+id/bt_fragment_2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/bt_test"
-        android:layout_toRightOf="@id/bt_fragment_1"
-        android:layout_marginLeft="35dp"
-        android:text="Fragment 2"
-        />
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/test"
-        android:layout_centerHorizontal="true"
-        android:text="test"
-        android:id="@+id/bt_test"/>
-
-    <FrameLayout
-        android:id="@+id/fl_fragment"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_below="@id/bt_fragment_1"
-        android:layout_alignParentBottom="true"
-        />
+        android:layout_weight="1"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:orientation="horizontal"
+        android:weightSum="3"
+        android:background="@drawable/custom_border">
 
-</RelativeLayout>
+        <Button
+            android:id="@+id/bt_profileActivity"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginRight="2.5dp"
+            android:layout_gravity="center_vertical"
+            android:text="1"/>
+
+        <Button
+            android:id="@+id/bt_runActivity"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginLeft="2.5dp"
+            android:layout_marginRight="2.5dp"
+            android:layout_gravity="center_vertical"
+            android:text="2"/>
+
+        <Button
+            android:id="@+id/bt_feedActivity"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginLeft="2.5dp"
+            android:layout_marginRight="2.5dp"
+            android:layout_gravity="center_vertical"
+            android:text="3"/>
+
+    </LinearLayout>
+
+</LinearLayout>

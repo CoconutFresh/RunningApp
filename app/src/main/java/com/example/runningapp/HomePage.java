@@ -13,45 +13,26 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 
 public class HomePage extends AppCompatActivity implements View.OnClickListener {
 
-    Button testButton, fragmentButton1, fragmentButton2;
-
-    Fragment firstFragment, secondFragment;
-    FragmentManager fragmentManager;
-    FragmentTransaction fragmentTransaction;
+    Button profileButton, runButton, feedButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_page);
 
-        testButton = findViewById(R.id.bt_test);
-        testButton.setOnClickListener(this);
+        profileButton = findViewById(R.id.bt_profileActivity);
+        runButton = findViewById(R.id.bt_runActivity);
+        feedButton = findViewById(R.id.bt_feedActivity);
 
-        fragmentButton1 = findViewById(R.id.bt_fragment_1);
-        fragmentButton1.setOnClickListener(this);
-
-        fragmentButton2 = findViewById(R.id.bt_fragment_2);
-        fragmentButton2.setOnClickListener(this);
-
-        /*bt_switch_fg1 = findViewById(R.id.bt_switch_fg1);
-        bt_switch_fg1.setOnClickListener(this);
-
-        bt_switch_fg2 = findViewById(R.id.bt_switch_fg2);
-        bt_switch_fg2.setOnClickListener(this);*/
-
-        firstFragment = new FirstFragment();
-        secondFragment = new SecondFragment();
-
-        //Test to see how fragments work
-        fragmentManager = getSupportFragmentManager();
-        fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.replace(R.id.fl_fragment, firstFragment);
-        fragmentTransaction.commit();
+        profileButton.setOnClickListener(this);
+        runButton.setOnClickListener(this);
+        feedButton.setOnClickListener(this);
 
     }
 
@@ -83,20 +64,14 @@ public class HomePage extends AppCompatActivity implements View.OnClickListener 
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.bt_test:
-                startActivity(new Intent(this, MapsActivity.class));
+            case R.id.bt_feedActivity:
+                Toast.makeText(this, "feed activity", Toast.LENGTH_SHORT).show();
                 break;
-            case R.id.bt_fragment_1:
-            case R.id.bt_switch_fg2:
-                fragmentTransaction = fragmentManager.beginTransaction();
-                fragmentTransaction.replace(R.id.fl_fragment, firstFragment);
-                fragmentTransaction.commit();
+            case R.id.bt_runActivity:
+                startActivity(new Intent(HomePage.this, MapsActivity.class));
                 break;
-            case R.id.bt_fragment_2:
-            case R.id.bt_switch_fg1:
-                fragmentTransaction = fragmentManager.beginTransaction();
-                fragmentTransaction.replace(R.id.fl_fragment, secondFragment);
-                fragmentTransaction.commit();
+            case R.id.bt_profileActivity:
+                Toast.makeText(this, "profile activity", Toast.LENGTH_SHORT).show();
                 break;
             default:
                 break;

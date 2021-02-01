@@ -10,6 +10,7 @@ import androidx.fragment.app.FragmentTransaction;
 
 import android.os.Handler;
 import android.os.SystemClock;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,8 +25,8 @@ public class RunningFragment extends Fragment {
     View view;
     private static long whenTimeStopped;
     private static Chronometer timer;
-    TextView tv_totalDist;
-    double totalDist = 0;
+    static TextView tv_totalDist;
+    static double totalDist = 0;
 
     Handler handler;
     MapsActivity activity;
@@ -48,7 +49,6 @@ public class RunningFragment extends Fragment {
         activity = (MapsActivity) getActivity();
         tv_totalDist = view.findViewById(R.id.tv_totalDist);
         tv_totalDist.setText(String.valueOf(totalDist));
-        updateDistance();
 
         //Setting up stopwatch
         timer = view.findViewById(R.id.cm_timer);
@@ -57,7 +57,7 @@ public class RunningFragment extends Fragment {
         return view;
     }
 
-    //Updates distance text view every second
+ /*   //Updates distance text view every second
     private void updateDistance() {
         handler = new Handler();
         handler.postDelayed(new Runnable() {
@@ -68,11 +68,16 @@ public class RunningFragment extends Fragment {
                 tv_totalDist.setText(String.valueOf(totalDist));
             }
         }, 0);
+    }*/
+
+    public static void updateDistance(double dist) {
+        tv_totalDist.setText(String.valueOf(dist));
     }
 
     public static void timerPause(boolean pause) {
         if(pause) {
             whenTimeStopped = timer.getBase() - SystemClock.elapsedRealtime();
+            Log.d("timeLog", "Time: " + whenTimeStopped);
             timer.stop();
         }
         else {
