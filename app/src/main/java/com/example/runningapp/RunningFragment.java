@@ -26,7 +26,7 @@ public class RunningFragment extends Fragment {
     private static long whenTimeStopped;
     private static Chronometer timer;
     static TextView tv_totalDist;
-    static double totalDist = 0;
+    static String totalDist = "0.00";
 
     Handler handler;
     MapsActivity activity;
@@ -48,7 +48,7 @@ public class RunningFragment extends Fragment {
 
         activity = (MapsActivity) getActivity();
         tv_totalDist = view.findViewById(R.id.tv_totalDist);
-        tv_totalDist.setText(String.valueOf(totalDist));
+        tv_totalDist.setText(totalDist);
 
         //Setting up stopwatch
         timer = view.findViewById(R.id.cm_timer);
@@ -70,8 +70,8 @@ public class RunningFragment extends Fragment {
         }, 0);
     }*/
 
-    public static void updateDistance(double dist) {
-        tv_totalDist.setText(String.valueOf(dist));
+    public static void updateDistance(String dist) {
+        tv_totalDist.setText(dist);
     }
 
     public static void timerPause(boolean pause) {

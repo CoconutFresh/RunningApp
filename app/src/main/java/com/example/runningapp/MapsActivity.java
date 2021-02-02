@@ -19,7 +19,6 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
-import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -32,7 +31,9 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.maps.model.RoundCap;
-import com.google.firebase.database.annotations.NotNull;
+
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener, LocationSource, StartButtonFragment.StartButtonListener, PauseButtonFragment.PauseButtonListener, Resume_StopFragment.Resume_StopListener {
 
@@ -48,7 +49,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     FragmentTransaction fragmentTransaction;
 
     Location pastLoc;
-    float totalDistRan = 0; //In km for now
+    float totalDistRan = 0; //In m for now
 
     private OnLocationChangedListener mapLocationListener = null;
 
@@ -77,7 +78,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         enableLocation();
         //Initialize fragments
         fragmentManager(R.id.maps_rl_fragment, initializeRunFragment);
-        //fragmentManager(R.id.maps_fl_buttonPlacement, startButtonFragment);
     }
 
     @Override
@@ -87,6 +87,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         //Enables my location layer
         enableLocation();
+
     }
 
     //Initializes lines seen on map while running
@@ -95,10 +96,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         //For line graphing
         runRouteOptions = new PolylineOptions();
         runRouteOptions.clickable(false)
-                .width(20)
+                .width(15)
                 .startCap(new RoundCap())
+                .endCap(new RoundCap())
                 .jointType(JointType.ROUND)
-                .color(Color.CYAN);
+                .color(0xFF4CAF50); //This color is green
+
     }
 
     //Checks for permissions
@@ -158,7 +161,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 }
                 return;
             default:
-                return;
         }
     }
 
@@ -177,25 +179,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             pastLoc = location;
         }
         else if (isRunning && !initialState && !pause) { //User clicks start run
-            //Testing distance algorithm
-            //double dist = getDistanceKm(pastLoc, curLoc);
-            float dist = pastLoc.distanceTo(location);
 
-            Log.d("dist", "Distance Traveled: " + dist);
+            float dist = pastLoc.distanceTo(location) / 1000;
+            DecimalFormat df = new DecimalFormat("#.##");
+            df.setRoundingMode(RoundingMode.DOWN);
 
-                totalDistRan += dist; //Adds to the total distance ran
-                RunningFragment.updateDistance(totalDistRan);
+            totalDistRan += dist; //Adds to the total distance ran
+            RunningFragment.updateDistance(df.format(totalDistRan));
 
-                pastLoc = location; //Updates the past location to the current location
-                updateTrail(curLoc);
-                mMap.animateCamera(CameraUpdateFactory.newLatLng(curLoc));
+            pastLoc = location; //Updates the past location to the current location
+            updateTrail(curLoc);
 
-            //TODO: Concerning pause button, the trail will probably connect where the person paused, gotta unchain the location point from where they unpause!
+            mMap.animateCamera(CameraUpdateFactory.newLatLng(curLoc));
         }
-        else if (pause) { //
-            pastLoc = null;
+        else if (pause) {
+            pastLoc = location;
         }
-        else if (initialState) { //Initial map preparations before the user starts run
+        else { //Initial map preparations before the user starts run
             initCamera(curLoc);
             pastLoc = location;
             fragmentManager(R.id.maps_fl_buttonPlacement, startButtonFragment); //Waits for camera and location to be initialized before allowed user to click start
@@ -206,14 +206,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     //For tracking, in charge of following device and drawing lines between past locations with present
     private void updateTrail(LatLng location) {
 
-        //TODO: Make Polyline look nicer
-
         //Log.d("polylineDebug", "This is being called");
         runRouteOptions.add(location);
         runRoute = mMap.addPolyline(runRouteOptions);
-        //mMap.animateCamera(CameraUpdateFactory.newLatLng(location));
-
-        //TODO:Add a way to make a new polyline object after pause in order to break the line into segments
     }
 
     //Initializes camera on Activity start up
@@ -227,36 +222,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         mMap.animateCamera(CameraUpdateFactory.newCameraPosition(initialCamera), 500, null);
     }
-
-
-
-
-
-
-
-/*    //Haversine formula for calculating distance between two sets of LatLng
-    private double getDistanceKm(@NotNull LatLng point1,@NotNull LatLng point2) {
-        if(point1 == null)
-            return 0;
-        int earthRadius = 6371;
-        double lat1 = point1.latitude, lat2 = point2.latitude;
-
-        double dLat = deg2Rad(point2.latitude - point1.latitude);
-        double dLng = deg2Rad(point2.longitude - point1.longitude);
-        double a =
-                Math.sin(dLat/2) * Math.sin(dLat/2)
-                        + Math.cos(deg2Rad(lat1)) * Math.cos(deg2Rad(lat2))
-                        * Math.sin(dLng/2) * Math.sin(dLng/2);
-
-        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-        double d = earthRadius * c;
-
-        return d;
-    }
-
-    private double deg2Rad(double deg) { //Helper function for getDistanceKm()
-        return deg * (Math.PI/180);
-    }*/
 
     //Necessary methods in order to change the locationSource to chad Android.location.Location
     @Override
@@ -280,6 +245,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void onPausePressed(boolean pause) { //pause fragment
+        initPolyline();
+
         this.pause = pause;
         fragmentManager(R.id.maps_fl_buttonPlacement, resume_stopFragment);
         RunningFragment.timerPause(pause);
@@ -302,7 +269,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         this.pause = pause;
         fragmentManager(R.id.maps_fl_buttonPlacement, pauseButtonFragment);
         RunningFragment.timerPause(pause);
-        viewChanger(FULLSCREEN);
+        viewChanger(FULLSCREEN); //suppose to be fullscreen
     }
 
     @Override
