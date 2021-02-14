@@ -10,7 +10,6 @@
     android:weightSum="8"
     tools:context=".MapsActivity" >
 
-
     <LinearLayout
         android:id="@+id/lin_map"
         android:layout_width="match_parent"
@@ -24,13 +23,13 @@
             android:name="com.google.android.gms.maps.SupportMapFragment"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="5.5" />
+            android:layout_weight="6" />
 
         <RelativeLayout
             android:id="@+id/maps_rl_fragment"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1.5"
+            android:layout_weight="1"
             android:animateLayoutChanges="true">
         </RelativeLayout>
 

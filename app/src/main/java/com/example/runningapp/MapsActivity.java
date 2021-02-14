@@ -1,6 +1,7 @@
 package com.example.runningapp;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
@@ -17,8 +18,14 @@ import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
+import android.widget.Toolbar;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -35,7 +42,7 @@ import com.google.android.gms.maps.model.RoundCap;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener, LocationSource, StartButtonFragment.StartButtonListener, PauseButtonFragment.PauseButtonListener, Resume_StopFragment.Resume_StopListener {
+public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, LocationListener, LocationSource, StartButtonFragment.StartButtonListener, PauseButtonFragment.PauseButtonListener, Resume_StopFragment.Resume_StopListener {
 
     private GoogleMap mMap;
     LocationManager locationManager;
@@ -43,7 +50,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     PolylineOptions runRouteOptions;
     CameraPosition initialCamera;
 
-    Fragment initializeRunFragment, startButtonFragment, runningFragment, pauseButtonFragment, resume_stopFragment;
+    Fragment initializeRunFragment, startButtonFragment, runningFragment, pauseButtonFragment, resume_stopFragment, finishRunFragment;
     SupportMapFragment mapFragment;
     FragmentManager fragmentManager;
     FragmentTransaction fragmentTransaction;
@@ -56,7 +63,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     boolean isRunning = false, initialState = true, pause = false;
 
     RelativeLayout maps_rl_fragment;
-    final float FULLSCREEN = 7f, SPLIT_SCREEN = 1.5f;
+    FrameLayout maps_fl_fragment;
+    final float FULLSCREEN = 7f, SPLIT_SCREEN = 1f;
+
+    RunSession runStats;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,9 +75,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         runningFragment = new RunningFragment();
         pauseButtonFragment = new PauseButtonFragment();
         resume_stopFragment = new Resume_StopFragment();
+        finishRunFragment = new FinishRunFragment();
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps); //Connects activity to layout layer
+
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -78,6 +90,33 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         enableLocation();
         //Initialize fragments
         fragmentManager(R.id.maps_rl_fragment, initializeRunFragment);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.finish_run_menu, menu);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                Toast.makeText(this, "Back selected", Toast.LENGTH_SHORT).show();
+                fragmentManager(R.id.maps_rl_fragment, runningFragment);
+                viewChanger(SPLIT_SCREEN);
+                viewButton(1);
+                return true;
+            case R.id.menu_delete:
+                Toast.makeText(this, "Delete Selected", Toast.LENGTH_SHORT).show();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+
     }
 
     @Override
@@ -112,7 +151,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             //If permissions are granted
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 500, 1, this); //In charge of the frequency that the app checks for distance
+                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, this); //In charge of the frequency that the app checks for distance
                 if(mMap != null) {
                     mMap.setMyLocationEnabled(true); //Enables my location layer
                     mMap.setLocationSource(this); //Changes the location data from beta fusedlocationproviderclient to chad Android.location.Location
@@ -180,12 +219,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
         else if (isRunning && !initialState && !pause) { //User clicks start run
 
-            float dist = pastLoc.distanceTo(location) / 1000;
-            DecimalFormat df = new DecimalFormat("#.##");
-            df.setRoundingMode(RoundingMode.DOWN);
+            float dist = pastLoc.distanceTo(location) / 1000; //converts it from meters to kilometers
 
-            totalDistRan += dist; //Adds to the total distance ran
-            RunningFragment.updateDistance(df.format(totalDistRan));
+            //totalDistRan += dist; //Adds to the total distance ran
+            totalDistRan += 0.025;
+            RunningFragment.updateDistance(totalDistRan);
 
             pastLoc = location; //Updates the past location to the current location
             updateTrail(curLoc);
@@ -241,6 +279,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         viewChanger(FULLSCREEN);
         fragmentManager(R.id.maps_rl_fragment, runningFragment);
         fragmentManager(R.id.maps_fl_buttonPlacement, pauseButtonFragment);
+
     }
 
     @Override
@@ -253,6 +292,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         viewChanger(SPLIT_SCREEN);
     }
 
+    //TODO: Change how this is implemented (The button design is too similar to Strava's)
     @Override
     public void onMapShownPressed(boolean mapShown) {
         if(mapShown) {
@@ -272,18 +312,30 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         viewChanger(FULLSCREEN); //suppose to be fullscreen
     }
 
+    //TODO: Implement a stop fragment with bundle
     @Override
     public void onStopPressed(boolean stop) {
-        isRunning = false;
-        fragmentManager(R.id.maps_fl_buttonPlacement, startButtonFragment);
-        fragmentManager(R.id.maps_rl_fragment, initializeRunFragment);
-        viewChanger(SPLIT_SCREEN);
+
+        //Grabbing RunSession data
+        runStats = new RunSession(RunningFragment.totalTime, totalDistRan, RunningFragment.minutePace, (int) RunningFragment.secondsPace);
+
+        //Fragment Behavior
+        //fragmentManager(R.id.maps_fl_buttonPlacement, startButtonFragment);
+        fragmentManager(R.id.maps_rl_fragment, finishRunFragment);
+        //fragmentManager(R.id.maps_rl_fragment, initializeRunFragment);
+        viewChanger(FULLSCREEN);
+        viewButton(0);
+
+
+
     }
 
     //Method for showing/hiding map and changing size of fragments
     private void viewChanger(float weight) {
         //Changes the weight of the relative layout embedded in the linear layout
         LinearLayout.LayoutParams param = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, weight);
+        maps_rl_fragment = findViewById(R.id.maps_rl_fragment);
+        maps_rl_fragment.setLayoutParams(param);
 
         if(weight == FULLSCREEN) { //We want the stats to be fullscreen so we hide map
             fragmentManager.beginTransaction()
@@ -297,9 +349,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     .show(mapFragment)
                     .commit();
         }
+    }
 
-        maps_rl_fragment = findViewById(R.id.maps_rl_fragment);
-        maps_rl_fragment.setLayoutParams(param);
+    private void viewButton(float weight) {
+        LinearLayout.LayoutParams param = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, weight);
+        maps_fl_fragment = findViewById(R.id.maps_fl_buttonPlacement);
+        maps_fl_fragment.setLayoutParams(param);
     }
 
     //Makes sure that if the user hits the back button, we no longer track their location

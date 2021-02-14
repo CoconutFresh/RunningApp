@@ -9,9 +9,11 @@
         android:id="@+id/lin_mode_streak"
         android:layout_width="match_parent"
         android:layout_height="150dp"
+        android:paddingTop="20dp"
+        android:paddingBottom="20dp"
         android:orientation="horizontal"
         android:layout_centerVertical="true"
-        android:divider="@color/green"
+        android:divider="@color/green_light"
         android:showDividers="middle" >
 
         <RelativeLayout

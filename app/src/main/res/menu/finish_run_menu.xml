@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <group
+        android:id="@+id/group_runMenu">
+        <item
+            android:title="Delete"
+            android:id="@+id/menu_delete"
+            android:icon="@drawable/ic_delete"
+            android:visible="false"
+            android:orderInCategory="2"
+            app:showAsAction="always"/>
+
+        <item
+            android:title="Back"
+            android:id="@+id/menu_back"
+            android:icon="@drawable/ic_back"
+            android:visible="false"
+            android:orderInCategory="1"
+            app:showAsAction="always"/>
+    </group>
+
+
+</menu>

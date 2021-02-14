@@ -33,7 +33,6 @@ public class HomePage extends AppCompatActivity implements View.OnClickListener 
         profileButton.setOnClickListener(this);
         runButton.setOnClickListener(this);
         feedButton.setOnClickListener(this);
-
     }
 
     @Override

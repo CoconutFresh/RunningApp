@@ -13,7 +13,7 @@
         android:paddingBottom="20dp"
         android:orientation="horizontal"
         android:weightSum="2"
-        android:divider="@color/green"
+        android:divider="@color/green_light"
         android:showDividers="middle">
 
         <RelativeLayout
@@ -96,6 +96,7 @@
             android:textColor="@color/black"/>
 
         <TextView
+            android:id="@+id/tv_avgPace"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="0:00"
