@@ -15,12 +15,13 @@ import android.widget.ImageButton;
 public class PauseButtonFragment extends Fragment implements View.OnClickListener{
     Button pauseRun;
     ImageButton showMap;
-    boolean mapShown = false;
+    //boolean mapShown = false;
     private PauseButtonListener listener;
 
     public interface PauseButtonListener {
         void onPausePressed(boolean pause);
-        void onMapShownPressed(boolean mapShown);
+        //void onMapShownPressed(boolean mapShown);
+        void onMapShownPressed();
     }
 
     public PauseButtonFragment() {
@@ -54,15 +55,14 @@ public class PauseButtonFragment extends Fragment implements View.OnClickListene
                 listener.onPausePressed(true);
                 break;
             case R.id.bt_map:
-                if(!mapShown) {
+                /*if(!mapShown) {
                     mapShown = true;
                 }
                 else {
                     mapShown = false;
                 }
-                listener.onMapShownPressed(mapShown);
-                /*mapShown = false ? true :  false; //toggle
                 listener.onMapShownPressed(mapShown);*/
+                listener.onMapShownPressed();
             default:
                 break;
         }

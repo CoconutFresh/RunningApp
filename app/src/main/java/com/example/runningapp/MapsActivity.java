@@ -26,6 +26,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 import android.widget.Toolbar;
+import android.widget.ViewFlipper;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -50,23 +51,26 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     PolylineOptions runRouteOptions;
     CameraPosition initialCamera;
 
-    Fragment initializeRunFragment, startButtonFragment, runningFragment, pauseButtonFragment, resume_stopFragment, finishRunFragment;
+    Fragment initializeRunFragment, startButtonFragment, runningFragment, pauseButtonFragment, resume_stopFragment, finishRunFragment; //All of the various fragments that this activity switches between
     SupportMapFragment mapFragment;
     FragmentManager fragmentManager;
     FragmentTransaction fragmentTransaction;
 
     Location pastLoc;
-    float totalDistRan = 0; //In m for now
+    float totalDistRan = 0; //In km for now
 
-    private OnLocationChangedListener mapLocationListener = null;
+    private OnLocationChangedListener mapLocationListener = null; //Switching Google's location listener for Androids
 
-    boolean isRunning = false, initialState = true, pause = false;
+    boolean isRunning = false, initialState = true, pause = false; //Flags that make up the behaviour of the GPS tracking
 
-    RelativeLayout maps_rl_fragment;
-    FrameLayout maps_fl_fragment;
-    final float FULLSCREEN = 7f, SPLIT_SCREEN = 1f;
+    //Related to changing the UI elements the user can see
+    RelativeLayout maps_rl_fragment; //Fragment pertaining to the current data
+    FrameLayout maps_fl_fragment; //Fragment which contains the buttons the user may interact with
+    final float FULLSCREEN = 7f, SPLIT_SCREEN = 1f, PRESENT_B = 1f, MISSING_B = 0f; //Weights of the layouts. _B for button
 
-    RunSession runStats;
+    RunSession runStats; //Object that contains the end of run data
+
+    boolean mapShown = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,14 +105,15 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         return super.onCreateOptionsMenu(menu);
     }
 
+    //Listener for the buttons within the menu bar. (Back button and Delete Session seen in Finish Run Fragment)
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
                 Toast.makeText(this, "Back selected", Toast.LENGTH_SHORT).show();
                 fragmentManager(R.id.maps_rl_fragment, runningFragment);
-                viewChanger(SPLIT_SCREEN);
-                viewButton(1);
+                viewChanger(FULLSCREEN);
+                viewButton(PRESENT_B);
                 return true;
             case R.id.menu_delete:
                 Toast.makeText(this, "Delete Selected", Toast.LENGTH_SHORT).show();
@@ -126,14 +131,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         //Enables my location layer
         enableLocation();
-
     }
 
     //Initializes lines seen on map while running
     private void initPolyline() {
-
         //For line graphing
-        runRouteOptions = new PolylineOptions();
+        runRouteOptions = new PolylineOptions(); //Makes a new polyline options object everytime this method is called. (For separating polyline when pausing and moving)
         runRouteOptions.clickable(false)
                 .width(15)
                 .startCap(new RoundCap())
@@ -159,7 +162,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
             //If permissions are not granted
             else {
-            //if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 requestPermissions(new String[] {
                         Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION,
                         Manifest.permission.INTERNET
@@ -222,7 +224,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             float dist = pastLoc.distanceTo(location) / 1000; //converts it from meters to kilometers
 
             //totalDistRan += dist; //Adds to the total distance ran
-            totalDistRan += 0.025;
+            totalDistRan += 0.025; //For testing purposes
             RunningFragment.updateDistance(totalDistRan);
 
             pastLoc = location; //Updates the past location to the current location
@@ -243,8 +245,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     //For tracking, in charge of following device and drawing lines between past locations with present
     private void updateTrail(LatLng location) {
-
-        //Log.d("polylineDebug", "This is being called");
         runRouteOptions.add(location);
         runRoute = mMap.addPolyline(runRouteOptions);
     }
@@ -279,27 +279,34 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         viewChanger(FULLSCREEN);
         fragmentManager(R.id.maps_rl_fragment, runningFragment);
         fragmentManager(R.id.maps_fl_buttonPlacement, pauseButtonFragment);
-
     }
 
+    //Pause Fragment
     @Override
-    public void onPausePressed(boolean pause) { //pause fragment
-        initPolyline();
+    public void onPausePressed(boolean pause) {
+        initPolyline(); //Separates the polyline if the user pauses and moves.
 
         this.pause = pause;
         fragmentManager(R.id.maps_fl_buttonPlacement, resume_stopFragment);
         RunningFragment.timerPause(pause);
         viewChanger(SPLIT_SCREEN);
+
+        ViewFlipper vf = (ViewFlipper) findViewById(R.id.viewFlipper);
+        vf.setDisplayedChild(1);
     }
 
     //TODO: Change how this is implemented (The button design is too similar to Strava's)
     @Override
-    public void onMapShownPressed(boolean mapShown) {
+    public void onMapShownPressed() {
+        ViewFlipper vf = (ViewFlipper) findViewById(R.id.viewFlipper);
+
         if(mapShown) {
-            viewChanger(SPLIT_SCREEN);
+            viewChanger(FULLSCREEN);
+            vf.setDisplayedChild(0);
         }
         else {
-            viewChanger(FULLSCREEN);
+            viewChanger(SPLIT_SCREEN);
+            vf.setDisplayedChild(1);
         }
     }
 
@@ -309,25 +316,21 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         this.pause = pause;
         fragmentManager(R.id.maps_fl_buttonPlacement, pauseButtonFragment);
         RunningFragment.timerPause(pause);
-        viewChanger(FULLSCREEN); //suppose to be fullscreen
+        viewChanger(FULLSCREEN);
+        ViewFlipper vf = (ViewFlipper) findViewById(R.id.viewFlipper);
+        vf.setDisplayedChild(0);
     }
 
-    //TODO: Implement a stop fragment with bundle
     @Override
     public void onStopPressed(boolean stop) {
-
-        //Grabbing RunSession data
-        runStats = new RunSession(RunningFragment.totalTime, totalDistRan, RunningFragment.minutePace, (int) RunningFragment.secondsPace);
+        //Grabbing data for RunSession
+        Log.d("runsession", InitializeRunFragment.type);
+        runStats = new RunSession(InitializeRunFragment.type, RunningFragment.totalTime, totalDistRan, RunningFragment.minutePace, (int) RunningFragment.secondsPace);
 
         //Fragment Behavior
-        //fragmentManager(R.id.maps_fl_buttonPlacement, startButtonFragment);
         fragmentManager(R.id.maps_rl_fragment, finishRunFragment);
-        //fragmentManager(R.id.maps_rl_fragment, initializeRunFragment);
         viewChanger(FULLSCREEN);
-        viewButton(0);
-
-
-
+        viewButton(MISSING_B);
     }
 
     //Method for showing/hiding map and changing size of fragments
@@ -342,12 +345,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     .setCustomAnimations(R.anim.slide_in_down, R.anim.slide_out_up)
                     .hide(mapFragment)
                     .commit();
+            mapShown = false; //Setting flag to false for onMapShownPressed() and others
         }
         else if (weight == SPLIT_SCREEN){ //We want a split screen with the map, so we show map
             fragmentManager.beginTransaction()
                     .setCustomAnimations(R.anim.slide_in_down, R.anim.slide_out_up)
                     .show(mapFragment)
                     .commit();
+            mapShown = true; //Setting flag to true for onMapShownPressed() and others
         }
     }
 
@@ -366,6 +371,4 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         finish();
         super.onBackPressed();
     }
-
-
 }

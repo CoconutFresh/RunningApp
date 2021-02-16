@@ -5,107 +5,209 @@
     android:layout_height="match_parent"
     tools:context=".RunningFragment">
 
-    <LinearLayout
-        android:id="@+id/lin_data"
-        android:layout_width="fill_parent"
-        android:layout_height="175dp"
-        android:paddingTop="20dp"
-        android:paddingBottom="20dp"
-        android:orientation="horizontal"
-        android:weightSum="2"
-        android:divider="@color/green_light"
-        android:showDividers="middle">
-
-        <RelativeLayout
-            android:id="@+id/lin_time"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1">
-
-            <TextView
-                android:id="@+id/tv_time"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingTop="5dp"
-                android:layout_weight="1"
-                android:text="Time"
-                android:textSize="20dp"
-                android:textAlignment="center"
-                android:textColor="@color/black"
-                android:layout_alignParentTop="true"/>
-
-            <Chronometer
-                android:id="@+id/cm_timer"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingTop="5dp"
-                android:layout_centerVertical="true"
-                android:textSize="35dp"
-                android:textAlignment="center"
-                android:textColor="@color/black"
-                android:layout_weight="1" />
-
-        </RelativeLayout>
-
-        <RelativeLayout
-            android:id="@+id/lin_dist"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            >
-
-            <TextView
-                android:id="@+id/tv_dist"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingTop="5dp"
-                android:text="Distance"
-                android:textSize="20dp"
-                android:textAlignment="center"
-                android:textColor="@color/black"
-                android:layout_alignParentTop="true"/>
-
-            <TextView
-                android:id="@+id/tv_totalDist"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingTop="5dp"
-                android:layout_centerVertical="true"
-                android:textSize="35dp"
-                android:textAlignment="center"
-                android:textColor="@color/black"
-                android:text="0.00"/>
-
-        </RelativeLayout>
-
-    </LinearLayout>
-
-    <RelativeLayout
-        android:id="@+id/rl_avgPace"
+    <ViewFlipper
+        android:id="@+id/viewFlipper"
         android:layout_width="match_parent"
-        android:layout_height="175dp"
-        android:layout_below="@+id/lin_data"
-        android:background="@drawable/custom_border">
+        android:layout_height="match_parent">
 
-        <TextView
+        <RelativeLayout
+            android:id="@+id/rl_data_l"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Average Pace"
-            android:textSize="20dp"
-            android:textAlignment="center"
-            android:textColor="@color/black"/>
+            android:layout_height="match_parent">
 
-        <TextView
-            android:id="@+id/tv_avgPace"
+            <LinearLayout
+                android:id="@+id/lin_data"
+                android:layout_width="fill_parent"
+                android:layout_height="175dp"
+                android:paddingTop="20dp"
+                android:paddingBottom="20dp"
+                android:orientation="horizontal"
+                android:weightSum="2"
+                android:divider="@color/green_light"
+                android:showDividers="middle">
+
+                <RelativeLayout
+                    android:id="@+id/lin_time"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1">
+
+                    <TextView
+                        android:id="@+id/tv_time"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingTop="5dp"
+                        android:layout_weight="1"
+                        android:text="Time"
+                        android:textSize="20dp"
+                        android:textAlignment="center"
+                        android:textColor="@color/black"
+                        android:layout_alignParentTop="true"/>
+
+                    <Chronometer
+                        android:id="@+id/cm_timer"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingTop="5dp"
+                        android:layout_centerVertical="true"
+                        android:textSize="35dp"
+                        android:textAlignment="center"
+                        android:textColor="@color/black"
+                        android:layout_weight="1" />
+
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:id="@+id/lin_dist"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    >
+
+                    <TextView
+                        android:id="@+id/tv_dist"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingTop="5dp"
+                        android:text="Distance"
+                        android:textSize="20dp"
+                        android:textAlignment="center"
+                        android:textColor="@color/black"
+                        android:layout_alignParentTop="true"/>
+
+                    <TextView
+                        android:id="@+id/tv_totalDist"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingTop="5dp"
+                        android:layout_centerVertical="true"
+                        android:textSize="35dp"
+                        android:textAlignment="center"
+                        android:textColor="@color/black"
+                        android:text="0.00"/>
+
+                </RelativeLayout>
+
+            </LinearLayout>
+
+            <RelativeLayout
+                android:id="@+id/rl_avgPace"
+                android:layout_width="match_parent"
+                android:layout_height="175dp"
+                android:layout_below="@+id/lin_data"
+                android:background="@drawable/custom_border">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Average Pace"
+                    android:textSize="20dp"
+                    android:textAlignment="center"
+                    android:textColor="@color/black"/>
+
+                <TextView
+                    android:id="@+id/tv_avgPace"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="0:00"
+                    android:textSize="35dp"
+                    android:textAlignment="center"
+                    android:textColor="@color/black"
+
+                    android:layout_centerVertical="true"/>
+
+            </RelativeLayout>
+
+        </RelativeLayout>
+
+        <LinearLayout
+            android:id="@+id/lin_data_s"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="0:00"
-            android:textSize="35dp"
-            android:textAlignment="center"
-            android:textColor="@color/black"
+            android:layout_height="match_parent"
+            android:paddingTop="10dp"
+            android:weightSum="3"
+            android:orientation="horizontal">
 
-            android:layout_centerVertical="true"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:weightSum="3"
+                android:orientation="horizontal"
+                android:divider="@color/green_light"
+                android:showDividers="middle">
 
-    </RelativeLayout>
+                <RelativeLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textAlignment="center"
+                        android:textSize="20dp"
+                        android:text="Time"/>
+
+                    <Chronometer
+                        android:id="@+id/cm_time_s"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentBottom="true"
+                        android:textAlignment="center"
+                        android:textSize="30dp" />
+
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textAlignment="center"
+                        android:textSize="20dp"
+                        android:text="Distance"/>
+
+                    <TextView
+                        android:id="@+id/tv_dist_s"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentBottom="true"
+                        android:textAlignment="center"
+                        android:textSize="30dp"
+                        android:text="0"/>
+
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textAlignment="center"
+                        android:textSize="20dp"
+                        android:text="Pace"/>
+
+                    <TextView
+                        android:id="@+id/tv_pace_s"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentBottom="true"
+                        android:textAlignment="center"
+                        android:textSize="30dp"
+                        android:text="0"/>
+
+                </RelativeLayout>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </ViewFlipper>
 
 </RelativeLayout>

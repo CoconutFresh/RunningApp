@@ -21,6 +21,7 @@ public class InitializeRunFragment extends Fragment  {
 
     View view;
     private Spinner spinnerMode;
+    static String type = "ERROR";
 
     public InitializeRunFragment() {
         // Required empty public constructor
@@ -46,8 +47,8 @@ public class InitializeRunFragment extends Fragment  {
         spinnerMode.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                //TODO: Save the selection into a string to later be stored into a run session object
                 Toast.makeText(getActivity(), spinnerMode.getSelectedItem().toString() + " selected", Toast.LENGTH_SHORT).show();
+                type = spinnerMode.getSelectedItem().toString();
             }
 
             @Override

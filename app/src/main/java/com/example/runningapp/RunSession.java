@@ -4,7 +4,6 @@ import java.util.List;
 
 public class RunSession {
 
-    //TODO: Figure out data types that are compatible with SQL
     private long totalTime = -1;
     private float totalDist = -1;
     private int avgPaceMin = -1;
@@ -12,7 +11,7 @@ public class RunSession {
     private String avgPace;
     List<CharSequence> segments;
 
-    public RunSession(long time, float dist, int min, int sec) {
+    public RunSession(String type, long time, float dist, int min, int sec) {
         setTime(time);
         setDist(dist);
         setPace(min, sec);

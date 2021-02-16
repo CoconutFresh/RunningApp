@@ -26,16 +26,15 @@ public class RunningFragment extends Fragment {
 
     View view;
     private static long whenTimeStopped;
-    private static Chronometer timer;
-    static TextView tv_totalDist;
-    static TextView tv_avgPace;
-    static String totalDist = "0";
+    private static Chronometer timer, timer_s;
+    static TextView tv_totalDist, tv_avgPace, tv_dist_s, tv_pace_s;
 
     static long totalTime;
-    static float avgPace;
+    static float avgPace, secondsPacePerc, secondsPace;;
     static int minutePace;
-    static float secondsPacePerc;
-    static float secondsPace;
+
+    static DecimalFormat dfRound = new DecimalFormat("#.##");
+    static DecimalFormat dfZero = new DecimalFormat("00");
 
     MapsActivity activity;
 
@@ -59,15 +58,24 @@ public class RunningFragment extends Fragment {
         //Initializing text views
         tv_totalDist = view.findViewById(R.id.tv_totalDist);
         tv_avgPace = view.findViewById(R.id.tv_avgPace);
+        tv_dist_s = view.findViewById(R.id.tv_dist_s);
+        tv_pace_s = view.findViewById(R.id.tv_pace_s);
 
-        tv_totalDist.setText(totalDist);
+        tv_totalDist.setText(dfRound.format(activity.totalDistRan));
+        tv_dist_s.setText(dfRound.format(activity.totalDistRan));
 
         //Setting up stopwatch
         timer = view.findViewById(R.id.cm_timer);
-        if (whenTimeStopped != 0) //Addition added to consider stop --> resume action
+        timer_s = view.findViewById(R.id.cm_time_s);
+
+        if (whenTimeStopped != 0) {//Addition added to consider stop --> resume action
             timer.setBase(SystemClock.elapsedRealtime() + whenTimeStopped);
-        else
+            timer_s.setBase(SystemClock.elapsedRealtime() + whenTimeStopped);
+        }
+        else {
             timer.start();
+            timer_s.start();
+        }
 
         return view;
     }
@@ -75,10 +83,8 @@ public class RunningFragment extends Fragment {
     //Dist is either measured in kilometers or miles
     public static void updateDistance(float dist) {
 
-        DecimalFormat dfRound = new DecimalFormat("#.##");
-        DecimalFormat dfZero = new DecimalFormat("00");
-
         tv_totalDist.setText(dfRound.format(dist));
+        tv_dist_s.setText(dfRound.format(dist));
 
         //TODO: Find a better way to update it (feels like it updates too often?), try to find a way to make it more accurate
         if(dist < 0.001) {
@@ -93,6 +99,7 @@ public class RunningFragment extends Fragment {
             secondsPace = 60 * secondsPacePerc; //Converts the percentage into seconds
 
             tv_avgPace.setText(minutePace + ":" + dfZero.format(secondsPace));
+            tv_pace_s.setText(minutePace + ":" + dfZero.format(secondsPace));
         }
     }
 
@@ -102,10 +109,13 @@ public class RunningFragment extends Fragment {
             whenTimeStopped = timer.getBase() - SystemClock.elapsedRealtime();
             Log.d("timeLog", "Time: " + whenTimeStopped);
             timer.stop();
+            timer_s.stop();
         }
         else { //resume
             timer.setBase(SystemClock.elapsedRealtime() + whenTimeStopped);
+            timer_s.setBase(SystemClock.elapsedRealtime() + whenTimeStopped);
             timer.start();
+            timer_s.start();
         }
     }
 }
