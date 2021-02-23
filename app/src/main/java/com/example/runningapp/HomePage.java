@@ -2,9 +2,6 @@ package com.example.runningapp;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -49,7 +46,7 @@ public class HomePage extends AppCompatActivity implements View.OnClickListener 
                 startActivity(new Intent(HomePage.this, Profile.class));
                 return true;
             case R.id.settings_link:
-                Intent intent = new Intent(HomePage.this, Settings.class);
+                Intent intent = new Intent(HomePage.this, SettingsActivity.class);
                 startActivity(intent);
                 return true;
             case R.id.logout_btn:

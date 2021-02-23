@@ -7,9 +7,12 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.preference.Preference;
+import androidx.preference.PreferenceManager;
 
 import android.Manifest;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
@@ -45,11 +48,15 @@ import java.text.DecimalFormat;
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, LocationListener, LocationSource, StartButtonFragment.StartButtonListener, PauseButtonFragment.PauseButtonListener, Resume_StopFragment.Resume_StopListener {
 
+    //Related to Google's Map SDK
     private GoogleMap mMap;
-    LocationManager locationManager;
     Polyline runRoute;
     PolylineOptions runRouteOptions;
     CameraPosition initialCamera;
+
+    //Related to Android's location management system
+    LocationManager locationManager;
+    private OnLocationChangedListener mapLocationListener = null; //Switching Google's location listener for Androids
 
     Fragment initializeRunFragment, startButtonFragment, runningFragment, pauseButtonFragment, resume_stopFragment, finishRunFragment; //All of the various fragments that this activity switches between
     SupportMapFragment mapFragment;
@@ -58,8 +65,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     Location pastLoc;
     float totalDistRan = 0; //In km for now
+    float unitConversion; //Conversion factor for miles and kilometers
 
-    private OnLocationChangedListener mapLocationListener = null; //Switching Google's location listener for Androids
+    String unit = "error";
 
     boolean isRunning = false, initialState = true, pause = false; //Flags that make up the behaviour of the GPS tracking
 
@@ -92,8 +100,31 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         initPolyline(); //For line graphing
         enableLocation();
+
         //Initialize fragments
         fragmentManager(R.id.maps_rl_fragment, initializeRunFragment);
+        /* I also initialize the StartButtonFragment later in the code.
+           Specifically, I start it in the onLocationChanged method when the
+           initialState flag is raised (In the else block of that large if/else statement).
+           We do this so that the application has time to find the user's location and move
+           the camera to that specific location
+         */
+
+        SharedPreferences sharedPreferences =  PreferenceManager.getDefaultSharedPreferences(this);
+        unitConversion = getUnitConversion(sharedPreferences.getString("distance_units", ""));
+    }
+
+    private float getUnitConversion(String unit) {
+        switch(unit) {
+            case "Miles":
+                this.unit = "mi";
+                return 1609.34f;
+            case "Kilometers":
+                this.unit = "km";
+                return 1000;
+            default:
+                return -1; //If there is an error, the distance will be negative
+        }
     }
 
     @Override
@@ -110,13 +141,18 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                Toast.makeText(this, "Back selected", Toast.LENGTH_SHORT).show();
                 fragmentManager(R.id.maps_rl_fragment, runningFragment);
                 viewChanger(FULLSCREEN);
                 viewButton(PRESENT_B);
                 return true;
             case R.id.menu_delete:
-                Toast.makeText(this, "Delete Selected", Toast.LENGTH_SHORT).show();
+                //TODO: Add a warning pop up box
+                locationManager.removeUpdates(this);
+                locationManager = null;
+                fragmentManager(R.id.maps_rl_fragment, initializeRunFragment);
+                getSupportFragmentManager().beginTransaction().remove(resume_stopFragment).commit();
+                viewChanger(SPLIT_SCREEN);
+                recreate();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -221,10 +257,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
         else if (isRunning && !initialState && !pause) { //User clicks start run
 
-            float dist = pastLoc.distanceTo(location) / 1000; //converts it from meters to kilometers
+            float dist = pastLoc.distanceTo(location) / unitConversion; //converts it from meters to kilometers
 
-            //totalDistRan += dist; //Adds to the total distance ran
-            totalDistRan += 0.025; //For testing purposes
+            totalDistRan += dist; //Adds to the total distance ran
+            //totalDistRan += 0.025; //For testing purposes
             RunningFragment.updateDistance(totalDistRan);
 
             pastLoc = location; //Updates the past location to the current location

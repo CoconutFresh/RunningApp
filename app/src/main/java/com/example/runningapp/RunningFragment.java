@@ -27,7 +27,7 @@ public class RunningFragment extends Fragment {
     View view;
     private static long whenTimeStopped;
     private static Chronometer timer, timer_s;
-    static TextView tv_totalDist, tv_avgPace, tv_dist_s, tv_pace_s;
+    static TextView tv_totalDist, tv_avgPace, tv_dist_s, tv_pace_s, tv_totalDistUnit;
 
     static long totalTime;
     static float avgPace, secondsPacePerc, secondsPace;;
@@ -60,9 +60,11 @@ public class RunningFragment extends Fragment {
         tv_avgPace = view.findViewById(R.id.tv_avgPace);
         tv_dist_s = view.findViewById(R.id.tv_dist_s);
         tv_pace_s = view.findViewById(R.id.tv_pace_s);
+        tv_totalDistUnit = view.findViewById(R.id.tv_totalDistUnit);
 
         tv_totalDist.setText(dfRound.format(activity.totalDistRan));
         tv_dist_s.setText(dfRound.format(activity.totalDistRan));
+        tv_totalDistUnit.setText(activity.unit);
 
         //Setting up stopwatch
         timer = view.findViewById(R.id.cm_timer);
