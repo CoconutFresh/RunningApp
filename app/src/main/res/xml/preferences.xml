@@ -15,7 +15,7 @@
     <PreferenceCategory app:title="@string/run_settings">
 
         <ListPreference
-            android:defaultValue="1"
+            android:defaultValue="@string/default_unit"
             android:entries="@array/unit_entries"
             android:entryValues="@array/unit_entries"
             android:key="distance_units"

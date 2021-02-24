@@ -9,6 +9,12 @@ import android.os.Bundle;
 
 import com.google.android.gms.maps.SupportMapFragment;
 
+
+/*TODO: Add more settings in the future
+  Night Mode
+  Arcade View(?)
+ */
+
 public class SettingsActivity extends AppCompatActivity {
 
     Fragment settingsFragment;

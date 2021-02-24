@@ -1,5 +1,6 @@
 package com.example.runningapp;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -50,7 +51,6 @@ public class FinishRunFragment extends Fragment implements View.OnClickListener{
         tv_pace = view.findViewById(R.id.tv_finPace);
 
         tv_time.setText((int)(session.getTotalTime() / 60) + ":" + dfZero.format(session.getTotalTime() % 60));
-
 
         tv_dist.setText(dfRound.format(session.getTotalDist()));
         tv_pace.setText(session.getAvgPace());

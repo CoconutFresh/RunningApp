@@ -120,4 +120,8 @@ public class RunningFragment extends Fragment {
             timer_s.start();
         }
     }
+
+    public static void timerReset() {
+        whenTimeStopped = 0;
+    }
 }

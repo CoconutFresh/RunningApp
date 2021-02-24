@@ -42,7 +42,7 @@
     <string name="run_settings">Run Details</string>
     <string name="general_settings">General</string>
 
-
-
+    <!-- Default Value -->
+    <string name="default_unit">Miles</string>
 
 </resources>

@@ -1,6 +1,7 @@
 package com.example.runningapp;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
@@ -11,6 +12,7 @@ import androidx.preference.Preference;
 import androidx.preference.PreferenceManager;
 
 import android.Manifest;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -111,7 +113,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
          */
 
         SharedPreferences sharedPreferences =  PreferenceManager.getDefaultSharedPreferences(this);
-        unitConversion = getUnitConversion(sharedPreferences.getString("distance_units", ""));
+        unitConversion = getUnitConversion(sharedPreferences.getString("distance_units", "Miles"));
     }
 
     private float getUnitConversion(String unit) {
@@ -146,18 +148,32 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 viewButton(PRESENT_B);
                 return true;
             case R.id.menu_delete:
-                //TODO: Add a warning pop up box
-                locationManager.removeUpdates(this);
-                locationManager = null;
-                fragmentManager(R.id.maps_rl_fragment, initializeRunFragment);
-                getSupportFragmentManager().beginTransaction().remove(resume_stopFragment).commit();
-                viewChanger(SPLIT_SCREEN);
-                recreate();
+                new AlertDialog.Builder(this)
+                        .setTitle("Delete Run")
+                        .setMessage("Are you sure you want to delete this session?")
+
+                        // Specifying a listener allows you to take an action before dismissing the dialog.
+                        // The dialog is automatically dismissed when a dialog button is clicked.
+                        .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                RunningFragment.timerReset();
+                                locationManager.removeUpdates(MapsActivity.this);
+                                locationManager = null;
+                                fragmentManager(R.id.maps_rl_fragment, initializeRunFragment);
+                                getSupportFragmentManager().beginTransaction().remove(resume_stopFragment).commit();
+                                viewChanger(SPLIT_SCREEN);
+                                recreate();
+                            }
+                        })
+
+                        // A null listener allows the button to dismiss the dialog and take no further action.
+                        .setNegativeButton(android.R.string.cancel, null)
+                        .show();
+
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
-
     }
 
     @Override
@@ -322,13 +338,15 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void onPausePressed(boolean pause) {
         initPolyline(); //Separates the polyline if the user pauses and moves.
 
-        this.pause = pause;
         fragmentManager(R.id.maps_fl_buttonPlacement, resume_stopFragment);
-        RunningFragment.timerPause(pause);
+
         viewChanger(SPLIT_SCREEN);
 
-        ViewFlipper vf = (ViewFlipper) findViewById(R.id.viewFlipper);
+        ViewFlipper vf = findViewById(R.id.viewFlipper);
         vf.setDisplayedChild(1);
+
+        this.pause = pause;
+        RunningFragment.timerPause(pause);
     }
 
     //TODO: Change how this is implemented (The button design is too similar to Strava's)
@@ -403,6 +421,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void onBackPressed() {
         locationManager.removeUpdates(this);
         locationManager = null;
+        RunningFragment.timerReset();
         startActivity(new Intent(this, HomePage.class));
         finish();
         super.onBackPressed();
