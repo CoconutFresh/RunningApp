@@ -87,14 +87,14 @@ public class RunningFragment extends Fragment {
 
         tv_totalDist.setText(dfRound.format(dist));
         tv_dist_s.setText(dfRound.format(dist));
+        //Timer is measured in milliseconds
+        totalTime = timer.getBase() - SystemClock.elapsedRealtime();
 
         //TODO: Find a better way to update it (feels like it updates too often?), try to find a way to make it more accurate
         if(dist < 0.001) {
             tv_avgPace.setText("0:00");
         }
         else {
-            //Timer is measured in milliseconds
-            totalTime = timer.getBase() - SystemClock.elapsedRealtime();
             avgPace = totalTime / (Float.parseFloat(dfRound.format(dist)) * -60000);
             minutePace = (int) avgPace; //Takes whole minutes
             secondsPacePerc = avgPace % 1; //Takes the percentage of the next minute

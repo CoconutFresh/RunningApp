@@ -8,6 +8,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -50,7 +51,9 @@ public class FinishRunFragment extends Fragment implements View.OnClickListener{
         tv_dist = view.findViewById(R.id.tv_finDist);
         tv_pace = view.findViewById(R.id.tv_finPace);
 
-        tv_time.setText((int)(session.getTotalTime() / 60) + ":" + dfZero.format(session.getTotalTime() % 60));
+        String timeOutput = (int)(session.getTotalTime() / 60) + ":" + dfZero.format(session.getTotalTime() % 60);
+        Log.d("timeOutput", timeOutput);
+        tv_time.setText(timeOutput);
 
         tv_dist.setText(dfRound.format(session.getTotalDist()));
         tv_pace.setText(session.getAvgPace());

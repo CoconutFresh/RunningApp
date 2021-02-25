@@ -59,6 +59,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     //Related to Android's location management system
     LocationManager locationManager;
     private OnLocationChangedListener mapLocationListener = null; //Switching Google's location listener for Androids
+    final int MIN_TIME_MS = 500, MIN_DISTANCE = 5;
 
     Fragment initializeRunFragment, startButtonFragment, runningFragment, pauseButtonFragment, resume_stopFragment, finishRunFragment; //All of the various fragments that this activity switches between
     SupportMapFragment mapFragment;
@@ -206,7 +207,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             //If permissions are granted
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, this); //In charge of the frequency that the app checks for distance
+                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, this); //In charge of the frequency that the app checks for distance (normally 500 and 5)
                 if(mMap != null) {
                     mMap.setMyLocationEnabled(true); //Enables my location layer
                     mMap.setLocationSource(this); //Changes the location data from beta fusedlocationproviderclient to chad Android.location.Location
@@ -378,8 +379,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onStopPressed(boolean stop) {
         //Grabbing data for RunSession
-        Log.d("runsession", InitializeRunFragment.type);
         runStats = new RunSession(InitializeRunFragment.type, RunningFragment.totalTime, totalDistRan, RunningFragment.minutePace, (int) RunningFragment.secondsPace);
+
+        //Test
+        Log.d("timeOutput", "RunningFragment: " + RunningFragment.totalTime);
+        Log.d("timeOutput", "runStats: " + runStats.getTotalTime());
 
         //Fragment Behavior
         fragmentManager(R.id.maps_rl_fragment, finishRunFragment);
