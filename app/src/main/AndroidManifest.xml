@@ -43,6 +43,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <service android:name=".ExampleService"
+            android:exported="false"
+            android:description="@string/service_desc"/>
     </application>
 
 </manifest>

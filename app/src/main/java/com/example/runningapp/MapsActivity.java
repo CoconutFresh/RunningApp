@@ -12,8 +12,11 @@ import androidx.preference.Preference;
 import androidx.preference.PreferenceManager;
 
 import android.Manifest;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -22,6 +25,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -48,7 +52,9 @@ import com.google.android.gms.maps.model.RoundCap;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 
-public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, LocationListener, LocationSource, StartButtonFragment.StartButtonListener, PauseButtonFragment.PauseButtonListener, Resume_StopFragment.Resume_StopListener {
+public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, LocationListener, ExampleService.ServiceCallback, LocationSource, StartButtonFragment.StartButtonListener, PauseButtonFragment.PauseButtonListener, Resume_StopFragment.Resume_StopListener {
+
+    private static final String TAG = "MapsActivity";
 
     //Related to Google's Map SDK
     private GoogleMap mMap;
@@ -83,6 +89,27 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     boolean mapShown = true;
 
+    //Service
+    private ExampleService mService;
+    private boolean isBound = false;
+
+    private ServiceConnection serviceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            Log.d(TAG, "OnServiceConnnected: connected to service");
+            ExampleService.LocalBinder binder = (ExampleService.LocalBinder) service;
+            mService = binder.getService();
+            ExampleService.setCallbacks(MapsActivity.this);
+            isBound = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            Log.d(TAG, "OnServiceConnnected: disconnected to service");
+            isBound = false;
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         initializeRunFragment = new InitializeRunFragment();
@@ -95,6 +122,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps); //Connects activity to layout layer
 
+        startService();
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -115,6 +143,21 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         SharedPreferences sharedPreferences =  PreferenceManager.getDefaultSharedPreferences(this);
         unitConversion = getUnitConversion(sharedPreferences.getString("distance_units", "Miles"));
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if(isBound && mService != null) {
+            unbindService(serviceConnection);
+        }
+
+    }
+
+    private void startService() {
+        Intent intent = new Intent(this, ExampleService.class);
+        startService(intent); //Not sure if I need this as well
+        bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
     }
 
     private float getUnitConversion(String unit) {
@@ -256,6 +299,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 return;
             default:
         }
+    }
+
+    @Override
+    public void getLocation(Location location) {
+        Log.d(TAG, "getLocation: Lat: " + location.getLatitude() + " Lng: " + location.getLongitude());
     }
 
     @Override

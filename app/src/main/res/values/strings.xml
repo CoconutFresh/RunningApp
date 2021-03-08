@@ -37,12 +37,14 @@
         <item>Bike</item>
     </string-array>
 
-
     <!-- Preference Titles -->
     <string name="run_settings">Run Details</string>
     <string name="general_settings">General</string>
 
     <!-- Default Value -->
     <string name="default_unit">Miles</string>
+
+    <!-- Service Descriptions -->
+    <string name="service_desc">Service for tracking location</string>
 
 </resources>
