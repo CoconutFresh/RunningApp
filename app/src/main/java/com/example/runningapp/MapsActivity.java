@@ -1,6 +1,7 @@
 package com.example.runningapp;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -52,7 +53,7 @@ import com.google.android.gms.maps.model.RoundCap;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 
-public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, LocationListener, ExampleService.ServiceCallback, LocationSource, StartButtonFragment.StartButtonListener, PauseButtonFragment.PauseButtonListener, Resume_StopFragment.Resume_StopListener {
+public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, ExampleService.ServiceCallback, LocationSource, StartButtonFragment.StartButtonListener, PauseButtonFragment.PauseButtonListener, Resume_StopFragment.Resume_StopListener {
 
     private static final String TAG = "MapsActivity";
 
@@ -63,9 +64,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     CameraPosition initialCamera;
 
     //Related to Android's location management system
-    LocationManager locationManager;
     private OnLocationChangedListener mapLocationListener = null; //Switching Google's location listener for Androids
-    final int MIN_TIME_MS = 500, MIN_DISTANCE = 5;
 
     Fragment initializeRunFragment, startButtonFragment, runningFragment, pauseButtonFragment, resume_stopFragment, finishRunFragment; //All of the various fragments that this activity switches between
     SupportMapFragment mapFragment;
@@ -110,6 +109,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     };
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         initializeRunFragment = new InitializeRunFragment();
@@ -122,7 +122,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps); //Connects activity to layout layer
 
-        startService();
+        startService(); //Starts location service
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -145,19 +145,25 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         unitConversion = getUnitConversion(sharedPreferences.getString("distance_units", "Miles"));
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    private void startService() {
+        Intent intent = new Intent(this, ExampleService.class);
+        Log.d(TAG, "startService: Service binded");
+        startForegroundService(intent); //Not sure if I need this as well
+        bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
         if(isBound && mService != null) {
+            Log.d(TAG, "onDestroy: Service unbinded");
+            mService.stopTracking();
+
+            Intent serviceIntent = new Intent(this, ExampleService.class);
+            stopService(serviceIntent);
             unbindService(serviceConnection);
         }
-
-    }
-
-    private void startService() {
-        Intent intent = new Intent(this, ExampleService.class);
-        startService(intent); //Not sure if I need this as well
-        bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
     }
 
     private float getUnitConversion(String unit) {
@@ -201,12 +207,21 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
                                 RunningFragment.timerReset();
-                                locationManager.removeUpdates(MapsActivity.this);
-                                locationManager = null;
+
+                                //Kills Handler Thread and Service
+                                //mService.stopTracking();
+                                /*Intent serviceIntent = new Intent(MapsActivity.this, ExampleService.class);
+                                stopService(serviceIntent);
+                                unbindService(serviceConnection);
+
+
                                 fragmentManager(R.id.maps_rl_fragment, initializeRunFragment);
                                 getSupportFragmentManager().beginTransaction().remove(resume_stopFragment).commit();
                                 viewChanger(SPLIT_SCREEN);
-                                recreate();
+                                recreate();*/
+                                //Switches Activity to home page
+                                startActivity(new Intent(MapsActivity.this, HomePage.class));
+                                finish();
                             }
                         })
 
@@ -245,12 +260,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     //Checks for permissions
     private void enableLocation() {
         //For finding current location of device
-        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+        //locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         //Checks for permissions
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             //If permissions are granted
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, this); //In charge of the frequency that the app checks for distance (normally 500 and 5)
+                //locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, this); //In charge of the frequency that the app checks for distance (normally 500 and 5)
                 if(mMap != null) {
                     mMap.setMyLocationEnabled(true); //Enables my location layer
                     mMap.setLocationSource(this); //Changes the location data from beta fusedlocationproviderclient to chad Android.location.Location
@@ -304,13 +319,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void getLocation(Location location) {
         Log.d(TAG, "getLocation: Lat: " + location.getLatitude() + " Lng: " + location.getLongitude());
-    }
-
-    @Override
-    public void onLocationChanged(@NonNull Location location) {
-
-        Log.d("trackLog", "Lat is: " + location.getLatitude() + ", "
-                + "Lng is: " + location.getLongitude());
 
         mapLocationListener.onLocationChanged(location); //This is where it switches poopy default fusedLocationProviderClient to Android.location.Location
         LatLng curLoc = new LatLng(location.getLatitude(), location.getLongitude());
@@ -471,9 +479,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     //Makes sure that if the user hits the back button, we no longer track their location
     @Override
     public void onBackPressed() {
-        locationManager.removeUpdates(this);
-        locationManager = null;
-        RunningFragment.timerReset();
+        RunningFragment.timerReset(); //Resets timer
+
+        //Switches Activity to home page
         startActivity(new Intent(this, HomePage.class));
         finish();
         super.onBackPressed();
