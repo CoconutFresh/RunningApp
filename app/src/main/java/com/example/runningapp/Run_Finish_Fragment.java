@@ -1,31 +1,32 @@
 package com.example.runningapp;
 
-import android.annotation.SuppressLint;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toolbar;
 
 import java.text.DecimalFormat;
 
-public class FinishRunFragment extends Fragment implements View.OnClickListener{
+public class Run_Finish_Fragment extends Fragment implements View.OnClickListener{
 
     TextView tv_time, tv_dist, tv_pace;
-    MapsActivity activity;
+    Run_Activity activity;
     RunSession session;
+    private static final String TAG = "Run_Finish_Fragment";
 
-    public FinishRunFragment() {
+    //Button
+    Button saveButton;
+
+    public Run_Finish_Fragment() {
         // Required empty public constructor
     }
 
@@ -41,10 +42,15 @@ public class FinishRunFragment extends Fragment implements View.OnClickListener{
 
         View view = inflater.inflate(R.layout.fragment_finish_run, container, false);
 
+        //Button
+        saveButton = view.findViewById(R.id.fbt_saveRun);
+        saveButton.setOnClickListener(this);
+
+        //Shows stats
         DecimalFormat dfRound = new DecimalFormat("#.##");
         DecimalFormat dfZero = new DecimalFormat("00");
 
-        activity = (MapsActivity) getActivity();
+        activity = (Run_Activity) getActivity();
         session = activity.runStats;
 
         tv_time = view.findViewById(R.id.tv_finTime);
@@ -71,6 +77,13 @@ public class FinishRunFragment extends Fragment implements View.OnClickListener{
 
     @Override
     public void onClick(View v) {
-
+        switch (v.getId()) {
+            case R.id.fbt_saveRun:
+                //use session data here
+                Log.d(TAG, "onClick: TEST!");
+                break;
+            default:
+                Log.d(TAG, "onClick: ERROR!");
+        }
     }
 }

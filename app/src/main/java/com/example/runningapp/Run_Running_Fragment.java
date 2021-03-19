@@ -1,28 +1,20 @@
 package com.example.runningapp;
 
-import android.content.Context;
 import android.os.Bundle;
 
-import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
 
-import android.os.Handler;
 import android.os.SystemClock;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.Chronometer;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import java.math.RoundingMode;
 import java.text.DecimalFormat;
 
-public class RunningFragment extends Fragment {
+public class Run_Running_Fragment extends Fragment {
 
     View view;
     private static long whenTimeStopped;
@@ -36,9 +28,9 @@ public class RunningFragment extends Fragment {
     static DecimalFormat dfRound = new DecimalFormat("#.##");
     static DecimalFormat dfZero = new DecimalFormat("00");
 
-    MapsActivity activity;
+    Run_Activity activity;
 
-    public RunningFragment() {
+    public Run_Running_Fragment() {
         // Required empty public constructor
     }
 
@@ -53,7 +45,7 @@ public class RunningFragment extends Fragment {
         // Inflate the layout for this fragment
         view = inflater.inflate(R.layout.fragment_running, container, false);
 
-        activity = (MapsActivity) getActivity();
+        activity = (Run_Activity) getActivity();
 
         //Initializing text views
         tv_totalDist = view.findViewById(R.id.tv_totalDist);

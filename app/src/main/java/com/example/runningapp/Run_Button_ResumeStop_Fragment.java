@@ -12,7 +12,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 
 
-public class Resume_StopFragment extends Fragment implements View.OnClickListener{
+public class Run_Button_ResumeStop_Fragment extends Fragment implements View.OnClickListener{
 
     Button resume;
     Button stop;
@@ -24,7 +24,7 @@ public class Resume_StopFragment extends Fragment implements View.OnClickListene
         void onStopPressed(boolean stop);
     }
 
-    public Resume_StopFragment() {
+    public Run_Button_ResumeStop_Fragment() {
         // Required empty public constructor
     }
 

@@ -21,7 +21,7 @@
         <activity android:name=".ForgotPassword"></activity>
         <activity android:name=".Profile" />
         <activity android:name=".Register" />
-        <activity android:name=".SettingsActivity" />
+        <activity android:name=".Settings_Activity" />
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").
@@ -35,7 +35,7 @@
             android:value="@string/google_maps_key" />
 
         <activity
-            android:name=".MapsActivity"
+            android:name=".Run_Activity"
             android:label="@string/title_activity_maps" />
         <activity android:name=".HomePage" />
         <activity android:name=".Login">
@@ -46,7 +46,7 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".ExampleService"
+        <service android:name=".Run_Tracker_Service"
             android:description="@string/service_desc"
             android:foregroundServiceType="location"/>
     </application>

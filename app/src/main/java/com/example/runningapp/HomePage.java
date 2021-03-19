@@ -46,7 +46,7 @@ public class HomePage extends AppCompatActivity implements View.OnClickListener 
                 startActivity(new Intent(HomePage.this, Profile.class));
                 return true;
             case R.id.settings_link:
-                Intent intent = new Intent(HomePage.this, SettingsActivity.class);
+                Intent intent = new Intent(HomePage.this, Settings_Activity.class);
                 startActivity(intent);
                 return true;
             case R.id.logout_btn:
@@ -64,7 +64,7 @@ public class HomePage extends AppCompatActivity implements View.OnClickListener 
                 Toast.makeText(this, "feed activity", Toast.LENGTH_SHORT).show();
                 break;
             case R.id.bt_runActivity:
-                startActivity(new Intent(HomePage.this, MapsActivity.class));
+                startActivity(new Intent(HomePage.this, Run_Activity.class));
                 break;
             case R.id.bt_profileActivity:
                 Toast.makeText(this, "profile activity", Toast.LENGTH_SHORT).show();

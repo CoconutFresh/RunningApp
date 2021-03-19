@@ -12,7 +12,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
 
-public class PauseButtonFragment extends Fragment implements View.OnClickListener{
+public class Run_Button_Pause_Fragment extends Fragment implements View.OnClickListener{
     Button pauseRun;
     ImageButton showMap;
     //boolean mapShown = false;
@@ -24,7 +24,7 @@ public class PauseButtonFragment extends Fragment implements View.OnClickListene
         void onMapShownPressed();
     }
 
-    public PauseButtonFragment() {
+    public Run_Button_Pause_Fragment() {
         // Required empty public constructor
     }
 

@@ -2,12 +2,8 @@ package com.example.runningapp;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
 
 import android.os.Bundle;
-
-import com.google.android.gms.maps.SupportMapFragment;
 
 
 /*TODO: Add more settings in the future
@@ -15,7 +11,7 @@ import com.google.android.gms.maps.SupportMapFragment;
   Arcade View(?)
  */
 
-public class SettingsActivity extends AppCompatActivity {
+public class Settings_Activity extends AppCompatActivity {
 
     Fragment settingsFragment;
 
@@ -25,7 +21,7 @@ public class SettingsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
 
-        settingsFragment = new SettingsFragment();
+        settingsFragment = new Settings_Fragment();
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.fl_settings, settingsFragment)
                 .commit();

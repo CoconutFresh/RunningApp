@@ -12,7 +12,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 
 
-public class StartButtonFragment extends Fragment implements View.OnClickListener {
+public class Run_Button_Start_Fragment extends Fragment implements View.OnClickListener {
 
     Button startButton;
     private StartButtonListener listener;
@@ -22,7 +22,7 @@ public class StartButtonFragment extends Fragment implements View.OnClickListene
         void onStartPressed(boolean startPressed);
     }
 
-    public StartButtonFragment() {
+    public Run_Button_Start_Fragment() {
         // Required empty public constructor
     }
 

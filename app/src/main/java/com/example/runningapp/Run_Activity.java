@@ -6,10 +6,8 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
-import androidx.preference.Preference;
 import androidx.preference.PreferenceManager;
 
 import android.Manifest;
@@ -20,10 +18,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
 import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -34,8 +29,6 @@ import android.view.MenuItem;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
-import android.widget.Toast;
-import android.widget.Toolbar;
 import android.widget.ViewFlipper;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -50,10 +43,7 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.maps.model.RoundCap;
 
-import java.math.RoundingMode;
-import java.text.DecimalFormat;
-
-public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, ExampleService.ServiceCallback, LocationSource, StartButtonFragment.StartButtonListener, PauseButtonFragment.PauseButtonListener, Resume_StopFragment.Resume_StopListener {
+public class Run_Activity extends AppCompatActivity implements OnMapReadyCallback, Run_Tracker_Service.ServiceCallback, LocationSource, Run_Button_Start_Fragment.StartButtonListener, Run_Button_Pause_Fragment.PauseButtonListener, Run_Button_ResumeStop_Fragment.Resume_StopListener {
 
     private static final String TAG = "MapsActivity";
 
@@ -82,23 +72,26 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     //Related to changing the UI elements the user can see
     RelativeLayout maps_rl_fragment; //Fragment pertaining to the current data
     FrameLayout maps_fl_fragment; //Fragment which contains the buttons the user may interact with
-    final float FULLSCREEN = 7f, SPLIT_SCREEN = 1f, PRESENT_B = 1f, MISSING_B = 0f; //Weights of the layouts. _B for button
+    //Weights for layouts
+    final float FULLSCREEN = 7f, SPLIT_SCREEN = 1f; //Manages map fragment visibility
+    final float PRESENT_B = 1f, MISSING_B = 0f; //Manages button fragment
 
     RunSession runStats; //Object that contains the end of run data
 
     boolean mapShown = true;
 
     //Service
-    private ExampleService mService;
+    private Run_Tracker_Service trackerService;
     private boolean isBound = false;
+    private boolean discardFlag = false;
 
     private ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             Log.d(TAG, "OnServiceConnnected: connected to service");
-            ExampleService.LocalBinder binder = (ExampleService.LocalBinder) service;
-            mService = binder.getService();
-            ExampleService.setCallbacks(MapsActivity.this);
+            Run_Tracker_Service.LocalBinder binder = (Run_Tracker_Service.LocalBinder) service;
+            trackerService = binder.getService();
+            Run_Tracker_Service.setCallbacks(Run_Activity.this);
             isBound = true;
         }
 
@@ -112,12 +105,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        initializeRunFragment = new InitializeRunFragment();
-        startButtonFragment = new StartButtonFragment();
-        runningFragment = new RunningFragment();
-        pauseButtonFragment = new PauseButtonFragment();
-        resume_stopFragment = new Resume_StopFragment();
-        finishRunFragment = new FinishRunFragment();
+        initializeRunFragment = new Run_Initialize_Fragment();
+        startButtonFragment = new Run_Button_Start_Fragment();
+        runningFragment = new Run_Running_Fragment();
+        pauseButtonFragment = new Run_Button_Pause_Fragment();
+        resume_stopFragment = new Run_Button_ResumeStop_Fragment();
+        finishRunFragment = new Run_Finish_Fragment();
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps); //Connects activity to layout layer
@@ -147,22 +140,21 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     private void startService() {
-        Intent intent = new Intent(this, ExampleService.class);
+        Intent intent = new Intent(this, Run_Tracker_Service.class);
         Log.d(TAG, "startService: Service binded");
-        startForegroundService(intent); //Not sure if I need this as well
+        this.startForegroundService(intent); //Not sure if I need this as well
         bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if(isBound && mService != null) {
-            Log.d(TAG, "onDestroy: Service unbinded");
-            mService.stopTracking();
+        if(!discardFlag && isBound && trackerService != null) {
+            trackerService.stopTracking();
 
-            Intent serviceIntent = new Intent(this, ExampleService.class);
+            Intent serviceIntent = new Intent(this, Run_Tracker_Service.class);
             stopService(serviceIntent);
-            unbindService(serviceConnection);
+            //unbindService(serviceConnection); //[NOTE] Unbinding crashes the activity
         }
     }
 
@@ -199,29 +191,18 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 return true;
             case R.id.menu_delete:
                 new AlertDialog.Builder(this)
-                        .setTitle("Delete Run")
-                        .setMessage("Are you sure you want to delete this session?")
+                        .setTitle("Discard Run")
+                        .setMessage("Are you sure you want to discard this session?")
 
                         // Specifying a listener allows you to take an action before dismissing the dialog.
                         // The dialog is automatically dismissed when a dialog button is clicked.
                         .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
-                                RunningFragment.timerReset();
-
-                                //Kills Handler Thread and Service
-                                //mService.stopTracking();
-                                /*Intent serviceIntent = new Intent(MapsActivity.this, ExampleService.class);
-                                stopService(serviceIntent);
-                                unbindService(serviceConnection);
-
-
-                                fragmentManager(R.id.maps_rl_fragment, initializeRunFragment);
-                                getSupportFragmentManager().beginTransaction().remove(resume_stopFragment).commit();
-                                viewChanger(SPLIT_SCREEN);
-                                recreate();*/
-                                //Switches Activity to home page
-                                startActivity(new Intent(MapsActivity.this, HomePage.class));
+                                discardFlag = true; //So the service does not unbind when restarting the activity
+                                Run_Running_Fragment.timerReset();
+                                Intent startIntent = getIntent();
                                 finish();
+                                startActivity(startIntent);
                             }
                         })
 
@@ -318,7 +299,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void getLocation(Location location) {
-        Log.d(TAG, "getLocation: Lat: " + location.getLatitude() + " Lng: " + location.getLongitude());
+        //Log.d(TAG, "getLocation: Lat: " + location.getLatitude() + " Lng: " + location.getLongitude());
+        Log.d(TAG, "discardFlag: " + discardFlag);
 
         mapLocationListener.onLocationChanged(location); //This is where it switches poopy default fusedLocationProviderClient to Android.location.Location
         LatLng curLoc = new LatLng(location.getLatitude(), location.getLongitude());
@@ -334,7 +316,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             totalDistRan += dist; //Adds to the total distance ran
             //totalDistRan += 0.025; //For testing purposes
-            RunningFragment.updateDistance(totalDistRan);
+            Run_Running_Fragment.updateDistance(totalDistRan);
 
             pastLoc = location; //Updates the past location to the current location
             updateTrail(curLoc);
@@ -403,7 +385,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         vf.setDisplayedChild(1);
 
         this.pause = pause;
-        RunningFragment.timerPause(pause);
+        Run_Running_Fragment.timerPause(pause);
     }
 
     //TODO: Change how this is implemented (The button design is too similar to Strava's)
@@ -426,7 +408,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void onResumePressed(boolean pause) {
         this.pause = pause;
         fragmentManager(R.id.maps_fl_buttonPlacement, pauseButtonFragment);
-        RunningFragment.timerPause(pause);
+        Run_Running_Fragment.timerPause(pause);
         viewChanger(FULLSCREEN);
         ViewFlipper vf = (ViewFlipper) findViewById(R.id.viewFlipper);
         vf.setDisplayedChild(0);
@@ -435,10 +417,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onStopPressed(boolean stop) {
         //Grabbing data for RunSession
-        runStats = new RunSession(InitializeRunFragment.type, RunningFragment.totalTime, totalDistRan, RunningFragment.minutePace, (int) RunningFragment.secondsPace);
+        runStats = new RunSession(Run_Initialize_Fragment.type, Run_Running_Fragment.totalTime, totalDistRan, Run_Running_Fragment.minutePace, (int) Run_Running_Fragment.secondsPace);
 
         //Test
-        Log.d("timeOutput", "RunningFragment: " + RunningFragment.totalTime);
+        Log.d("timeOutput", "RunningFragment: " + Run_Running_Fragment.totalTime);
         Log.d("timeOutput", "runStats: " + runStats.getTotalTime());
 
         //Fragment Behavior
@@ -476,10 +458,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         maps_fl_fragment.setLayoutParams(param);
     }
 
-    //Makes sure that if the user hits the back button, we no longer track their location
+    //Brings the user back to the homepage
     @Override
     public void onBackPressed() {
-        RunningFragment.timerReset(); //Resets timer
+        Run_Running_Fragment.timerReset(); //Resets timer
 
         //Switches Activity to home page
         startActivity(new Intent(this, HomePage.class));

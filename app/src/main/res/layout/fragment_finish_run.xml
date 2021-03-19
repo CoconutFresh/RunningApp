@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:paddingTop="25dp"
-    tools:context=".FinishRunFragment">
+    tools:context=".Run_Finish_Fragment">
 
     <EditText
         android:id="@+id/edt_runTitle"

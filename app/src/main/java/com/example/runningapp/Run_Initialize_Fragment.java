@@ -17,13 +17,13 @@ import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-public class InitializeRunFragment extends Fragment  {
+public class Run_Initialize_Fragment extends Fragment  {
 
     View view;
     private Spinner spinnerMode;
     static String type = "ERROR";
 
-    public InitializeRunFragment() {
+    public Run_Initialize_Fragment() {
         // Required empty public constructor
     }
 
