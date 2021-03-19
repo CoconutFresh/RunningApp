@@ -11,6 +11,10 @@ public class RunSession {
     private String avgPace;
     List<CharSequence> segments;
 
+    //For internal systems
+    private String formatTime = "ERROR!";
+    private String formatPace = "ERROR!";
+
     public RunSession(String type, long time, float dist, int min, int sec) {
         setTime(time);
         setDist(dist);
@@ -18,6 +22,7 @@ public class RunSession {
     }
 
     public void setTime(long inputTime) {
+        //Converts it to seconds. (In case we need data)
         totalTime = inputTime / -1000;
     }
 
@@ -32,6 +37,14 @@ public class RunSession {
         avgPace = avgPaceMin + ":" + avgPaceSec;
     }
 
+    public void setFormatTime(String inputTime) {
+        formatTime = inputTime;
+    }
+
+    public void setFormatPace(String inputPace) {
+        formatPace = inputPace;
+    }
+
     public long getTotalTime() {
         return totalTime;
     }
@@ -42,5 +55,13 @@ public class RunSession {
 
     public String getAvgPace() {
         return avgPace;
+    }
+
+    public String getFormatTime() {
+        return formatTime;
+    }
+
+    public String getFormatPace() {
+        return formatPace;
     }
 }

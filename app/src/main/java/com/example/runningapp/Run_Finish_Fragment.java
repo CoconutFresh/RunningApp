@@ -57,12 +57,13 @@ public class Run_Finish_Fragment extends Fragment implements View.OnClickListene
         tv_dist = view.findViewById(R.id.tv_finDist);
         tv_pace = view.findViewById(R.id.tv_finPace);
 
-        String timeOutput = (int)(session.getTotalTime() / 60) + ":" + dfZero.format(session.getTotalTime() % 60);
-        Log.d("timeOutput", timeOutput);
-        tv_time.setText(timeOutput);
+        /*String timeOutput = (int)(session.getTotalTime() / 60) + ":" + dfZero.format(session.getTotalTime() % 60);
+        Log.d("timeOutput", "Session total time: " + session.getTotalTime());
+        Log.d("timeOutput", timeOutput);*/
+        tv_time.setText(session.getFormatTime());
 
         tv_dist.setText(dfRound.format(session.getTotalDist()));
-        tv_pace.setText(session.getAvgPace());
+        tv_pace.setText(session.getFormatPace());
 
         return view;
     }
@@ -79,11 +80,11 @@ public class Run_Finish_Fragment extends Fragment implements View.OnClickListene
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.fbt_saveRun:
-                //use session data here
+                //TODO: Use session object's data here
                 Log.d(TAG, "onClick: TEST!");
                 break;
             default:
-                Log.d(TAG, "onClick: ERROR!");
+                Log.d(TAG, "onClick: ERROR! onClick reached default!");
         }
     }
 }

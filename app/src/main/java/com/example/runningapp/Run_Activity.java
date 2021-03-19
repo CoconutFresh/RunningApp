@@ -43,6 +43,8 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.maps.model.RoundCap;
 
+import java.text.DecimalFormat;
+
 public class Run_Activity extends AppCompatActivity implements OnMapReadyCallback, Run_Tracker_Service.ServiceCallback, LocationSource, Run_Button_Start_Fragment.StartButtonListener, Run_Button_Pause_Fragment.PauseButtonListener, Run_Button_ResumeStop_Fragment.Resume_StopListener {
 
     private static final String TAG = "MapsActivity";
@@ -314,12 +316,13 @@ public class Run_Activity extends AppCompatActivity implements OnMapReadyCallbac
 
             float dist = pastLoc.distanceTo(location) / unitConversion; //converts it from meters to kilometers
 
-            totalDistRan += dist; //Adds to the total distance ran
-            //totalDistRan += 0.025; //For testing purposes
+            //totalDistRan += dist; //Adds to the total distance ran
+            totalDistRan += 0.025; //For testing purposes
             Run_Running_Fragment.updateDistance(totalDistRan);
 
             pastLoc = location; //Updates the past location to the current location
             updateTrail(curLoc);
+            updateNotification();
 
             mMap.animateCamera(CameraUpdateFactory.newLatLng(curLoc));
         }
@@ -332,6 +335,13 @@ public class Run_Activity extends AppCompatActivity implements OnMapReadyCallbac
             fragmentManager(R.id.maps_fl_buttonPlacement, startButtonFragment); //Waits for camera and location to be initialized before allowed user to click start
             initialState = false;
         }
+    }
+
+    private void updateNotification() {
+        //Run_Running_Fragment.totalTime;
+        DecimalFormat dfRound = new DecimalFormat("#.##");
+
+        trackerService.updateNotification(Run_Running_Fragment.formatTime, dfRound.format(totalDistRan), Run_Running_Fragment.formatPace);
     }
 
     //For tracking, in charge of following device and drawing lines between past locations with present
@@ -418,6 +428,9 @@ public class Run_Activity extends AppCompatActivity implements OnMapReadyCallbac
     public void onStopPressed(boolean stop) {
         //Grabbing data for RunSession
         runStats = new RunSession(Run_Initialize_Fragment.type, Run_Running_Fragment.totalTime, totalDistRan, Run_Running_Fragment.minutePace, (int) Run_Running_Fragment.secondsPace);
+        //session additionals
+        runStats.setFormatPace(Run_Running_Fragment.formatPace);
+        runStats.setFormatTime(Run_Running_Fragment.formatTime);
 
         //Test
         Log.d("timeOutput", "RunningFragment: " + Run_Running_Fragment.totalTime);

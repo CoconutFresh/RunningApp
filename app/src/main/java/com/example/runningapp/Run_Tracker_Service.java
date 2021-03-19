@@ -23,10 +23,9 @@ import androidx.core.app.NotificationManagerCompat;
 
 public class Run_Tracker_Service extends Service implements LocationListener{
 
-    private static final String TAG = "ExampleService"; //Debugging Tag
+    private static final String TAG = "Run_Tracker_Service"; //Debugging Tag
 
     private IBinder mBinder = new LocalBinder(); //Binds service to activity
-
     private static ServiceCallback callback; //Communication from service to activity
 
     //Location
@@ -38,10 +37,11 @@ public class Run_Tracker_Service extends Service implements LocationListener{
     private HandlerThread handlerThread = new HandlerThread("Tracker Thread"); //Background thread for tracking locaiton
     private Handler threadHandler;
 
-    //test
-    int testCounter = 0;
+    //Notification
     NotificationCompat.Builder builder;
     NotificationManagerCompat notificationManager;
+
+    int counter = 0;
 
     public interface ServiceCallback {
         void getLocation(Location location);
@@ -90,6 +90,7 @@ public class Run_Tracker_Service extends Service implements LocationListener{
         if (ActivityCompat.checkSelfPermission(Run_Tracker_Service.this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(Run_Tracker_Service.this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, this, threadHandler.getLooper());
         }
+
     }
 
     @Nullable
@@ -106,7 +107,7 @@ public class Run_Tracker_Service extends Service implements LocationListener{
 
     @Override
     public void onLocationChanged(@NonNull Location location) {
-        Log.d(TAG, "onLocationChanged: Lat: " + location.getLatitude() + " Lng: " + location.getLongitude());
+        //Log.d(TAG, "onLocationChanged: Lat: " + location.getLatitude() + " Lng: " + location.getLongitude());
 
         mainHandler.post(new Runnable() {
             @Override
@@ -115,6 +116,8 @@ public class Run_Tracker_Service extends Service implements LocationListener{
             }
         });
 
+        //builder.setContentText("test: " + counter++);
+        //notificationManager.notify();
         //notificationManager.notify(1, builder.build());
     }
 
@@ -122,6 +125,13 @@ public class Run_Tracker_Service extends Service implements LocationListener{
     public void onTaskRemoved(Intent rootIntent) {
         super.onTaskRemoved(rootIntent);
         stopSelf();
+    }
+
+    //Updates the notification banner
+    public void updateNotification(String time, String distance, String pace) {
+        //Log.d(TAG, "Time: " + time + " Distance: " + distance + " Pace: " + pace);
+        builder.setContentText("Time: " + time + " Distance: " + distance + " Pace: " + pace);
+        notificationManager.notify(1, builder.build());
     }
 
     //Terminates handlers
