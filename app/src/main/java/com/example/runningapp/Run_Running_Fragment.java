@@ -56,8 +56,8 @@ public class Run_Running_Fragment extends Fragment {
         tv_pace_s = view.findViewById(R.id.tv_pace_s);
         tv_totalDistUnit = view.findViewById(R.id.tv_totalDistUnit);
 
-        tv_totalDist.setText(dfRound.format(activity.totalDistRan));
-        tv_dist_s.setText(dfRound.format(activity.totalDistRan));
+        tv_totalDist.setText(dfRound.format(activity.totalDist));
+        tv_dist_s.setText(dfRound.format(activity.totalDist));
         tv_totalDistUnit.setText(activity.unit);
 
         //Setting up stopwatch
@@ -91,11 +91,6 @@ public class Run_Running_Fragment extends Fragment {
             tv_avgPace.setText("0:00");
         }
         else {
-            /*avgPace = totalTime / (Float.parseFloat(dfRound.format(totalDist)) * -60000);
-            minutePace = (int) avgPace; //Takes whole minutes
-            secondsPacePerc = avgPace % 1; //Takes the percentage of the next minute
-            secondsPace = 60 * secondsPacePerc; //Converts the percentage into seconds*/
-
             tv_avgPace.setText(minutePace + ":" + dfZero.format(secondsPace));
             tv_pace_s.setText(minutePace + ":" + dfZero.format(secondsPace));
         }
@@ -107,7 +102,7 @@ public class Run_Running_Fragment extends Fragment {
         formatTime = ((int)totalTime / -60000) + ":" + dfZero.format((totalTime / -1000) % 60);
 
         if(totalDist < 0.01) {
-        formatPace = "0:00";
+            formatPace = "0:00";
         }
         else {
             //Pace
@@ -118,7 +113,6 @@ public class Run_Running_Fragment extends Fragment {
 
             formatPace = minutePace + ":" + dfZero.format(secondsPace);
         }
-
         Log.d("formatData", formatTime);
         Log.d("formatData", formatPace);
     }

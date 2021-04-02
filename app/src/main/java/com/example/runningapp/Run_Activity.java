@@ -37,11 +37,9 @@ import com.google.android.gms.maps.LocationSource;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
-import com.google.android.gms.maps.model.JointType;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
-import com.google.android.gms.maps.model.RoundCap;
 
 import java.text.DecimalFormat;
 
@@ -64,12 +62,12 @@ public class Run_Activity extends AppCompatActivity implements OnMapReadyCallbac
     FragmentTransaction fragmentTransaction;
 
     Location pastLoc;
-    float totalDistRan = 0; //In km for now
+    float totalDist = 0; //In km for now
     float unitConversion; //Conversion factor for miles and kilometers
 
     String unit = "error";
 
-    boolean isRunning = false, initialState = true, pause = false; //Flags that make up the behaviour of the GPS tracking
+    //boolean isRunning = false, initialState = true, pause = false; //Flags that make up the behaviour of the GPS tracking
 
     //Related to changing the UI elements the user can see
     RelativeLayout maps_rl_fragment; //Fragment pertaining to the current data
@@ -124,7 +122,7 @@ public class Run_Activity extends AppCompatActivity implements OnMapReadyCallbac
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        initPolyline(); //For line graphing
+        //initPolyline(); //For line graphing
         enableLocation();
 
         //Initialize fragments
@@ -144,7 +142,7 @@ public class Run_Activity extends AppCompatActivity implements OnMapReadyCallbac
     private void startService() {
         Intent intent = new Intent(this, Run_Tracker_Service.class);
         Log.d(TAG, "startService: Service binded");
-        this.startForegroundService(intent); //Not sure if I need this as well
+        startForegroundService(intent); //Not sure if I need this as well
         bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
     }
 
@@ -156,7 +154,7 @@ public class Run_Activity extends AppCompatActivity implements OnMapReadyCallbac
 
             Intent serviceIntent = new Intent(this, Run_Tracker_Service.class);
             stopService(serviceIntent);
-            //unbindService(serviceConnection); //[NOTE] Unbinding crashes the activity
+            //unbindService(serviceConnection); //[NOTE] Unbinding crashes the activity (Not sure if I need to unbind a service that I've already stopped)
         }
     }
 
@@ -164,11 +162,14 @@ public class Run_Activity extends AppCompatActivity implements OnMapReadyCallbac
         switch(unit) {
             case "Miles":
                 this.unit = "mi";
+                //trackerService.setUnitConversion(1609.34f);
                 return 1609.34f;
             case "Kilometers":
                 this.unit = "km";
+                //trackerService.setUnitConversion(1000);
                 return 1000;
             default:
+                //trackerService.setUnitConversion(-1);
                 return -1; //If there is an error, the distance will be negative
         }
     }
@@ -225,19 +226,6 @@ public class Run_Activity extends AppCompatActivity implements OnMapReadyCallbac
 
         //Enables my location layer
         enableLocation();
-    }
-
-    //Initializes lines seen on map while running
-    private void initPolyline() {
-        //For line graphing
-        runRouteOptions = new PolylineOptions(); //Makes a new polyline options object everytime this method is called. (For separating polyline when pausing and moving)
-        runRouteOptions.clickable(false)
-                .width(15)
-                .startCap(new RoundCap())
-                .endCap(new RoundCap())
-                .jointType(JointType.ROUND)
-                .color(0xFF4CAF50); //This color is green
-
     }
 
     //Checks for permissions
@@ -300,54 +288,36 @@ public class Run_Activity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     @Override
+    public void initialState(LatLng curLoc) {
+        initCamera(curLoc);
+        fragmentManager(R.id.maps_fl_buttonPlacement, startButtonFragment); //Waits for camera and location to be initialized before allowed user to click start
+    }
+
+    @Override
     public void getLocation(Location location) {
-        //Log.d(TAG, "getLocation: Lat: " + location.getLatitude() + " Lng: " + location.getLongitude());
-        Log.d(TAG, "discardFlag: " + discardFlag);
-
         mapLocationListener.onLocationChanged(location); //This is where it switches poopy default fusedLocationProviderClient to Android.location.Location
-        LatLng curLoc = new LatLng(location.getLatitude(), location.getLongitude());
-
-        //In charge of how map is displayed to the runner (Running vs. Not Running)
-        if (!isRunning && !initialState) { //Map shows users location before run starts
-            mMap.animateCamera(CameraUpdateFactory.newLatLng(curLoc));
-            pastLoc = location;
-        }
-        else if (isRunning && !initialState && !pause) { //User clicks start run
-
-            float dist = pastLoc.distanceTo(location) / unitConversion; //converts it from meters to kilometers
-
-            //totalDistRan += dist; //Adds to the total distance ran
-            totalDistRan += 0.025; //For testing purposes
-            Run_Running_Fragment.updateDistance(totalDistRan);
-
-            pastLoc = location; //Updates the past location to the current location
-            updateTrail(curLoc);
-            updateNotification();
-
-            mMap.animateCamera(CameraUpdateFactory.newLatLng(curLoc));
-        }
-        else if (pause) {
-            pastLoc = location;
-        }
-        else { //Initial map preparations before the user starts run
-            initCamera(curLoc);
-            pastLoc = location;
-            fragmentManager(R.id.maps_fl_buttonPlacement, startButtonFragment); //Waits for camera and location to be initialized before allowed user to click start
-            initialState = false;
-        }
     }
 
-    private void updateNotification() {
-        //Run_Running_Fragment.totalTime;
+    @Override
+    public void animateCamera(LatLng curLoc) {
+        mMap.animateCamera(CameraUpdateFactory.newLatLng(curLoc));
+    }
+
+    @Override
+    public void updateTrail() {
+        trackerService.runRoute = mMap.addPolyline(trackerService.runRouteOptions);
+    }
+
+    @Override
+    public void updateDistance(float totalDist) {
+        Run_Running_Fragment.updateDistance(totalDist);
+        this.totalDist = totalDist;
+    }
+
+    @Override
+    public void updateNotification() {
         DecimalFormat dfRound = new DecimalFormat("#.##");
-
-        trackerService.updateNotification(Run_Running_Fragment.formatTime, dfRound.format(totalDistRan), Run_Running_Fragment.formatPace);
-    }
-
-    //For tracking, in charge of following device and drawing lines between past locations with present
-    private void updateTrail(LatLng location) {
-        runRouteOptions.add(location);
-        runRoute = mMap.addPolyline(runRouteOptions);
+        trackerService.updateNotification(Run_Running_Fragment.formatTime, dfRound.format(totalDist), unit, Run_Running_Fragment.formatPace);
     }
 
     //Initializes camera on Activity start up
@@ -376,7 +346,8 @@ public class Run_Activity extends AppCompatActivity implements OnMapReadyCallbac
     //Listeners for button fragments
     @Override
     public void onStartPressed(boolean startPressed) { //start fragment
-        isRunning = startPressed;
+        //isRunning = startPressed;
+        trackerService.setIsRunning(startPressed);
         viewChanger(FULLSCREEN);
         fragmentManager(R.id.maps_rl_fragment, runningFragment);
         fragmentManager(R.id.maps_fl_buttonPlacement, pauseButtonFragment);
@@ -385,7 +356,8 @@ public class Run_Activity extends AppCompatActivity implements OnMapReadyCallbac
     //Pause Fragment
     @Override
     public void onPausePressed(boolean pause) {
-        initPolyline(); //Separates the polyline if the user pauses and moves.
+        //TODO: Call trackerService.initPolyline()
+        trackerService.initPolyline(); //Separates the polyline if the user pauses and moves.
 
         fragmentManager(R.id.maps_fl_buttonPlacement, resume_stopFragment);
 
@@ -394,7 +366,8 @@ public class Run_Activity extends AppCompatActivity implements OnMapReadyCallbac
         ViewFlipper vf = findViewById(R.id.viewFlipper);
         vf.setDisplayedChild(1);
 
-        this.pause = pause;
+        //this.pause = pause;
+        trackerService.setPause(pause);
         Run_Running_Fragment.timerPause(pause);
     }
 
@@ -416,7 +389,8 @@ public class Run_Activity extends AppCompatActivity implements OnMapReadyCallbac
     //resume/stop fragment
     @Override
     public void onResumePressed(boolean pause) {
-        this.pause = pause;
+        //this.pause = pause;
+        trackerService.setPause(pause);
         fragmentManager(R.id.maps_fl_buttonPlacement, pauseButtonFragment);
         Run_Running_Fragment.timerPause(pause);
         viewChanger(FULLSCREEN);
@@ -427,8 +401,8 @@ public class Run_Activity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onStopPressed(boolean stop) {
         //Grabbing data for RunSession
-        runStats = new RunSession(Run_Initialize_Fragment.type, Run_Running_Fragment.totalTime, totalDistRan, Run_Running_Fragment.minutePace, (int) Run_Running_Fragment.secondsPace);
-        //session additionals
+        runStats = new RunSession(Run_Initialize_Fragment.type, Run_Running_Fragment.totalTime, totalDist, Run_Running_Fragment.minutePace, (int) Run_Running_Fragment.secondsPace);
+        //Session additions
         runStats.setFormatPace(Run_Running_Fragment.formatPace);
         runStats.setFormatTime(Run_Running_Fragment.formatTime);
 
@@ -474,11 +448,24 @@ public class Run_Activity extends AppCompatActivity implements OnMapReadyCallbac
     //Brings the user back to the homepage
     @Override
     public void onBackPressed() {
-        Run_Running_Fragment.timerReset(); //Resets timer
 
-        //Switches Activity to home page
-        startActivity(new Intent(this, HomePage.class));
-        finish();
-        super.onBackPressed();
+        new AlertDialog.Builder(this)
+                .setTitle("Discard Run")
+                .setMessage("Are you sure you want to discard this session?")
+                // Specifying a listener allows you to take an action before dismissing the dialog.
+                // The dialog is automatically dismissed when a dialog button is clicked.
+                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        Run_Running_Fragment.timerReset(); //Resets timer
+
+                        //Switches Activity to home page
+                        startActivity(new Intent(Run_Activity.this, HomePage.class));
+                        finish();
+                    }
+                })
+                // A null listener allows the button to dismiss the dialog and take no further action.
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+        //super.onBackPressed();
     }
 }

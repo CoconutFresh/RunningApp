@@ -57,9 +57,6 @@ public class Run_Finish_Fragment extends Fragment implements View.OnClickListene
         tv_dist = view.findViewById(R.id.tv_finDist);
         tv_pace = view.findViewById(R.id.tv_finPace);
 
-        /*String timeOutput = (int)(session.getTotalTime() / 60) + ":" + dfZero.format(session.getTotalTime() % 60);
-        Log.d("timeOutput", "Session total time: " + session.getTotalTime());
-        Log.d("timeOutput", timeOutput);*/
         tv_time.setText(session.getFormatTime());
 
         tv_dist.setText(dfRound.format(session.getTotalDist()));
