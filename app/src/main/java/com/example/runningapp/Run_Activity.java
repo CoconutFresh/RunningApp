@@ -29,6 +29,7 @@ import android.view.MenuItem;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 import android.widget.ViewFlipper;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -49,36 +50,34 @@ public class Run_Activity extends AppCompatActivity implements OnMapReadyCallbac
 
     //Related to Google's Map SDK
     private GoogleMap mMap;
-    Polyline runRoute;
-    PolylineOptions runRouteOptions;
     CameraPosition initialCamera;
 
     //Related to Android's location management system
     private OnLocationChangedListener mapLocationListener = null; //Switching Google's location listener for Androids
 
+    //Fragments
     Fragment initializeRunFragment, startButtonFragment, runningFragment, pauseButtonFragment, resume_stopFragment, finishRunFragment; //All of the various fragments that this activity switches between
     SupportMapFragment mapFragment;
     FragmentManager fragmentManager;
     FragmentTransaction fragmentTransaction;
 
-    Location pastLoc;
     float totalDist = 0; //In km for now
     float unitConversion; //Conversion factor for miles and kilometers
-
     String unit = "error";
-
-    //boolean isRunning = false, initialState = true, pause = false; //Flags that make up the behaviour of the GPS tracking
 
     //Related to changing the UI elements the user can see
     RelativeLayout maps_rl_fragment; //Fragment pertaining to the current data
     FrameLayout maps_fl_fragment; //Fragment which contains the buttons the user may interact with
+
     //Weights for layouts
     final float FULLSCREEN = 7f, SPLIT_SCREEN = 1f; //Manages map fragment visibility
     final float PRESENT_B = 1f, MISSING_B = 0f; //Manages button fragment
+    //View flipper index for run session statistics
+    final int RUN_LARGE = 0, RUN_SMALL = 1;
+
+    boolean mapShown = true; //Flag for whether map is shown or not
 
     RunSession runStats; //Object that contains the end of run data
-
-    boolean mapShown = true;
 
     //Service
     private Run_Tracker_Service trackerService;
@@ -162,14 +161,11 @@ public class Run_Activity extends AppCompatActivity implements OnMapReadyCallbac
         switch(unit) {
             case "Miles":
                 this.unit = "mi";
-                //trackerService.setUnitConversion(1609.34f);
                 return 1609.34f;
             case "Kilometers":
                 this.unit = "km";
-                //trackerService.setUnitConversion(1000);
                 return 1000;
             default:
-                //trackerService.setUnitConversion(-1);
                 return -1; //If there is an error, the distance will be negative
         }
     }
@@ -208,7 +204,6 @@ public class Run_Activity extends AppCompatActivity implements OnMapReadyCallbac
                                 startActivity(startIntent);
                             }
                         })
-
                         // A null listener allows the button to dismiss the dialog and take no further action.
                         .setNegativeButton(android.R.string.cancel, null)
                         .show();
@@ -257,12 +252,8 @@ public class Run_Activity extends AppCompatActivity implements OnMapReadyCallbac
         //Starts the Maps Activity with the initialize run fragment
         Fragment prev;
         fragmentManager = getSupportFragmentManager();
-        if(layout == R.id.maps_rl_fragment) {
-            prev = fragmentManager.findFragmentById(R.id.maps_rl_fragment);
-        }
-        else {
-            prev = fragmentManager.findFragmentById(R.id.maps_fl_buttonPlacement);
-        }
+        prev = fragmentManager.findFragmentById(layout);
+
         if (prev != null) {
             fragmentTransaction = fragmentManager.beginTransaction();
             fragmentTransaction.setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
@@ -270,7 +261,7 @@ public class Run_Activity extends AppCompatActivity implements OnMapReadyCallbac
         }
         FragmentTransaction addTransaction = fragmentManager.beginTransaction();
         addTransaction.setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
-        addTransaction.addToBackStack(null);
+        //addTransaction.addToBackStack(null); //TODO: make a new parameter which signals method to whether this should be used or not
         addTransaction.add(layout, fragment).commitAllowingStateLoss();
     }
 
@@ -364,7 +355,7 @@ public class Run_Activity extends AppCompatActivity implements OnMapReadyCallbac
         viewChanger(SPLIT_SCREEN);
 
         ViewFlipper vf = findViewById(R.id.viewFlipper);
-        vf.setDisplayedChild(1);
+        vf.setDisplayedChild(RUN_SMALL);
 
         //this.pause = pause;
         trackerService.setPause(pause);
@@ -378,11 +369,11 @@ public class Run_Activity extends AppCompatActivity implements OnMapReadyCallbac
 
         if(mapShown) {
             viewChanger(FULLSCREEN);
-            vf.setDisplayedChild(0);
+            vf.setDisplayedChild(RUN_LARGE);
         }
         else {
             viewChanger(SPLIT_SCREEN);
-            vf.setDisplayedChild(1);
+            vf.setDisplayedChild(RUN_SMALL);
         }
     }
 
@@ -395,7 +386,7 @@ public class Run_Activity extends AppCompatActivity implements OnMapReadyCallbac
         Run_Running_Fragment.timerPause(pause);
         viewChanger(FULLSCREEN);
         ViewFlipper vf = (ViewFlipper) findViewById(R.id.viewFlipper);
-        vf.setDisplayedChild(0);
+        vf.setDisplayedChild(RUN_LARGE);
     }
 
     @Override
@@ -445,27 +436,48 @@ public class Run_Activity extends AppCompatActivity implements OnMapReadyCallbac
         maps_fl_fragment.setLayoutParams(param);
     }
 
-    //Brings the user back to the homepage
+
+    //Determines the actions of the back button
     @Override
     public void onBackPressed() {
 
-        new AlertDialog.Builder(this)
-                .setTitle("Discard Run")
-                .setMessage("Are you sure you want to discard this session?")
-                // Specifying a listener allows you to take an action before dismissing the dialog.
-                // The dialog is automatically dismissed when a dialog button is clicked.
-                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        Run_Running_Fragment.timerReset(); //Resets timer
+        //initializeRunFragment, startButtonFragment, runningFragment, pauseButtonFragment, resume_stopFragment, finishRunFragment;
+        if(initializeRunFragment.isResumed()) {
+            //Switches Activity to home page
+            startActivity(new Intent(Run_Activity.this, HomePage.class));
+            finish();
+        }
+        else if(runningFragment.isResumed()) {
+            //Toast.makeText(this, "RunningFragment is true", Toast.LENGTH_SHORT).show();
+            ViewFlipper vf = (ViewFlipper) findViewById(R.id.viewFlipper);
+            if(vf.getDisplayedChild() == RUN_SMALL) {
+                viewChanger(FULLSCREEN);
+                vf.setDisplayedChild(RUN_LARGE);
+            }
+            else {
+                new AlertDialog.Builder(this)
+                        .setTitle("Discard Run")
+                        .setMessage("Are you sure you want to discard this session?")
+                        // Specifying a listener allows you to take an action before dismissing the dialog.
+                        // The dialog is automatically dismissed when a dialog button is clicked.
+                        .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                Run_Running_Fragment.timerReset(); //Resets timer
 
-                        //Switches Activity to home page
-                        startActivity(new Intent(Run_Activity.this, HomePage.class));
-                        finish();
-                    }
-                })
-                // A null listener allows the button to dismiss the dialog and take no further action.
-                .setNegativeButton(android.R.string.cancel, null)
-                .show();
-        //super.onBackPressed();
+                                //Switches Activity to home page
+                                startActivity(new Intent(Run_Activity.this, HomePage.class));
+                                finish();
+                            }
+                        })
+                        // A null listener allows the button to dismiss the dialog and take no further action.
+                        .setNegativeButton(android.R.string.cancel, null)
+                        .show();
+            }
+        }
+        else if(finishRunFragment.isResumed()) {
+            fragmentManager(R.id.maps_rl_fragment, runningFragment);
+            viewChanger(FULLSCREEN);
+            viewButton(PRESENT_B);
+        }
     }
 }

@@ -35,14 +35,13 @@ public class Run_Tracker_Service extends Service implements LocationListener{
     private IBinder mBinder = new LocalBinder(); //Binds service to activity
     private static ServiceCallback callback; //Communication from service to activity
 
-    //Location
+    //Android Location Library
     LocationManager locationManager;
     final int MIN_TIME_MS = 500, MIN_DISTANCE = 5;
 
     //Multi-threading
-    Handler mainHandler = new Handler(Looper.getMainLooper()); //Communicates with UI thread
+    private Handler mainHandler = new Handler(Looper.getMainLooper()); //Communicates with UI thread
     private HandlerThread handlerThread = new HandlerThread("Tracker Thread"); //Background thread for tracking location
-    //private Handler threadHandler;
 
     //Notification
     NotificationCompat.Builder builder;
@@ -54,19 +53,18 @@ public class Run_Tracker_Service extends Service implements LocationListener{
 
     //Running data
     float totalDist = 0;
+    Location pastLoc;
+    float unitConversion = -1;
 
     //Flags
     boolean isRunning = false, initialState = true, pause = false; //Flags that make up the behaviour of the GPS tracking
-
-    //TODO: Figure this out
-    Location pastLoc;
-    float unitConversion = -1;
 
 /*    //TEST
     int testCounter = 0;
     Handler mHandler;
     int maxValue = 5000;*/
 
+    //Service Callback Interface for service to activity communication
     public interface ServiceCallback {
         void getLocation(Location location);
         void initialState(LatLng curLoc);
@@ -156,8 +154,6 @@ public class Run_Tracker_Service extends Service implements LocationListener{
                 .jointType(JointType.ROUND)
                 .color(0xFF4CAF50); //This color is green
     }
-
-
 
     @Override
     public void onLocationChanged(@NonNull Location location) {
