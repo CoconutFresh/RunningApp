@@ -15,16 +15,23 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class Run_Initialize_Fragment extends Fragment  {
 
     View view;
-    private Spinner spinnerMode;
-    static String type = "ERROR";
+    //private Spinner spinnerMode;
+    //static String type = "ERROR";
+
+    public static TextView modeSelect;
 
     public Run_Initialize_Fragment() {
         // Required empty public constructor
+    }
+
+    public interface initializeRunInterface {
+        void modeSelect();
     }
 
     @Override
@@ -37,12 +44,13 @@ public class Run_Initialize_Fragment extends Fragment  {
                              Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_initialize_run, container, false);
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), R.layout.spinner_item, getResources().getStringArray(R.array.modes));
+        modeSelect = view.findViewById(R.id.tv_modeSelect);
+
+       /* ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), R.layout.spinner_item, getResources().getStringArray(R.array.modes));
         spinnerMode = view.findViewById(R.id.spinner_mode);
         spinnerMode.setBackground(null);
 
         spinnerMode.setAdapter(adapter);
-
 
         spinnerMode.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -55,8 +63,12 @@ public class Run_Initialize_Fragment extends Fragment  {
             public void onNothingSelected(AdapterView<?> parent) {
 
             }
-        });
+        });*/
 
         return view;
+    }
+
+    public static void setMode(String mode) {
+        modeSelect.setText(mode);
     }
 }

@@ -14,8 +14,8 @@
 
         <item
             android:title="Back"
-            android:id="@+id/menu_back"
-            android:icon="@drawable/ic_back"
+            android:id="@+id/menu_run_panel"
+            android:icon="@drawable/ic_run_panel"
             android:visible="false"
             android:orderInCategory="1"
             app:showAsAction="always"/>

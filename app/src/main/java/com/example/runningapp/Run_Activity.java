@@ -5,6 +5,8 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -26,6 +28,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -41,10 +44,11 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.material.navigation.NavigationView;
 
 import java.text.DecimalFormat;
 
-public class Run_Activity extends AppCompatActivity implements OnMapReadyCallback, Run_Tracker_Service.ServiceCallback, LocationSource, Run_Button_Start_Fragment.StartButtonListener, Run_Button_Pause_Fragment.PauseButtonListener, Run_Button_ResumeStop_Fragment.Resume_StopListener {
+public class Run_Activity extends AppCompatActivity implements OnMapReadyCallback, Run_Tracker_Service.ServiceCallback, LocationSource, NavigationView.OnNavigationItemSelectedListener, Run_Button_Start_Fragment.StartButtonListener, Run_Button_Pause_Fragment.PauseButtonListener, Run_Button_ResumeStop_Fragment.Resume_StopListener {
 
     private static final String TAG = "MapsActivity";
 
@@ -84,6 +88,11 @@ public class Run_Activity extends AppCompatActivity implements OnMapReadyCallbac
     private boolean isBound = false;
     private boolean discardFlag = false;
 
+    //test
+    String mode = "ERROR";
+    //test
+    private DrawerLayout drawer;
+
     private ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
@@ -121,13 +130,20 @@ public class Run_Activity extends AppCompatActivity implements OnMapReadyCallbac
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        //initPolyline(); //For line graphing
-        enableLocation();
+        NavigationView navView = findViewById(R.id.nav_view);
+        navView.setCheckedItem(R.id.nav_run);
+        navView.setNavigationItemSelectedListener(this);
+
+        drawer = findViewById(R.id.drawer_layout);
+
+
+
+        enableLocation(); //Checks for permissions
 
         //Initialize fragments
         fragmentManager(R.id.maps_rl_fragment, initializeRunFragment);
         /* I also initialize the StartButtonFragment later in the code.
-           Specifically, I start it in the onLocationChanged method when the
+           Specifically, I start it in the onLocationChanged method in the service when the
            initialState flag is raised (In the else block of that large if/else statement).
            We do this so that the application has time to find the user's location and move
            the camera to that specific location
@@ -174,7 +190,8 @@ public class Run_Activity extends AppCompatActivity implements OnMapReadyCallbac
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.finish_run_menu, menu);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+        //getSupportActionBar().setDisplayHomeAsUpEnabled(false); //Hides back button
+        menu.findItem(R.id.menu_run_panel).setVisible(true);
 
         return super.onCreateOptionsMenu(menu);
     }
@@ -183,10 +200,16 @@ public class Run_Activity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
-            case android.R.id.home:
-                fragmentManager(R.id.maps_rl_fragment, runningFragment);
+            case R.id.menu_run_panel:
+                /*fragmentManager(R.id.maps_rl_fragment, runningFragment);
                 viewChanger(FULLSCREEN);
-                viewButton(PRESENT_B);
+                viewButton(PRESENT_B);*/
+                if(drawer.isDrawerOpen(GravityCompat.START)) {
+                    drawer.closeDrawer(GravityCompat.START);
+                }
+                else {
+                    drawer.openDrawer(GravityCompat.START);
+                }
                 return true;
             case R.id.menu_delete:
                 new AlertDialog.Builder(this)
@@ -261,7 +284,6 @@ public class Run_Activity extends AppCompatActivity implements OnMapReadyCallbac
         }
         FragmentTransaction addTransaction = fragmentManager.beginTransaction();
         addTransaction.setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
-        //addTransaction.addToBackStack(null); //TODO: make a new parameter which signals method to whether this should be used or not
         addTransaction.add(layout, fragment).commitAllowingStateLoss();
     }
 
@@ -337,7 +359,7 @@ public class Run_Activity extends AppCompatActivity implements OnMapReadyCallbac
     //Listeners for button fragments
     @Override
     public void onStartPressed(boolean startPressed) { //start fragment
-        //isRunning = startPressed;
+        drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED); //Disables the ability to open the side panel
         trackerService.setIsRunning(startPressed);
         viewChanger(FULLSCREEN);
         fragmentManager(R.id.maps_rl_fragment, runningFragment);
@@ -347,7 +369,6 @@ public class Run_Activity extends AppCompatActivity implements OnMapReadyCallbac
     //Pause Fragment
     @Override
     public void onPausePressed(boolean pause) {
-        //TODO: Call trackerService.initPolyline()
         trackerService.initPolyline(); //Separates the polyline if the user pauses and moves.
 
         fragmentManager(R.id.maps_fl_buttonPlacement, resume_stopFragment);
@@ -392,7 +413,7 @@ public class Run_Activity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onStopPressed(boolean stop) {
         //Grabbing data for RunSession
-        runStats = new RunSession(Run_Initialize_Fragment.type, Run_Running_Fragment.totalTime, totalDist, Run_Running_Fragment.minutePace, (int) Run_Running_Fragment.secondsPace);
+        runStats = new RunSession(mode, Run_Running_Fragment.totalTime, totalDist, Run_Running_Fragment.minutePace, (int) Run_Running_Fragment.secondsPace);
         //Session additions
         runStats.setFormatPace(Run_Running_Fragment.formatPace);
         runStats.setFormatTime(Run_Running_Fragment.formatTime);
@@ -441,8 +462,10 @@ public class Run_Activity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onBackPressed() {
 
-        //initializeRunFragment, startButtonFragment, runningFragment, pauseButtonFragment, resume_stopFragment, finishRunFragment;
-        if(initializeRunFragment.isResumed()) {
+        if(drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+        }
+        else if(initializeRunFragment.isResumed()) {
             //Switches Activity to home page
             startActivity(new Intent(Run_Activity.this, HomePage.class));
             finish();
@@ -480,4 +503,31 @@ public class Run_Activity extends AppCompatActivity implements OnMapReadyCallbac
             viewButton(PRESENT_B);
         }
     }
+
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+
+        switch(item.getItemId()) {
+            case R.id.nav_run:
+                Toast.makeText(this, "Selected: Run", Toast.LENGTH_SHORT).show();
+                mode = "Run";
+                break;
+            case R.id.nav_walk:
+                Toast.makeText(this, "Selected: Walk", Toast.LENGTH_SHORT).show();
+                mode = "Walk";
+                break;
+            case R.id.nav_hike:
+                Toast.makeText(this, "Selected: Hike", Toast.LENGTH_SHORT).show();
+                mode = "Hike";
+                break;
+            case R.id.nav_bike:
+                Toast.makeText(this, "Selected: Bike", Toast.LENGTH_SHORT).show();
+                mode = "Bike";
+                break;
+        }
+
+        Run_Initialize_Fragment.setMode(mode);
+        return true;
+    }
+
 }

@@ -33,14 +33,24 @@
                 android:textColor="@color/black"/>
 
 
-            <Spinner
+            <!--<Spinner
                 android:id="@+id/spinner_mode"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
                 android:layout_toRightOf="@+id/tv_mode"
                 android:textAlignment="center"
-                android:entries="@array/modes"/>
+                android:entries="@array/modes"/>-->
+
+            <TextView
+                android:id="@+id/tv_modeSelect"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_toRightOf="@+id/tv_mode"
+                android:text="Run"
+                android:textSize="20dp"
+                android:textColor="@color/black" />
 
 
         </RelativeLayout>
@@ -55,6 +65,7 @@
             android:textSize="20dp"
             android:textColor="@color/black"
             android:gravity="center_vertical"/>
+
     </LinearLayout>
 
 </RelativeLayout>

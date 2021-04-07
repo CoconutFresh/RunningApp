@@ -2,11 +2,13 @@ package com.example.runningapp;
 
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 import android.os.SystemClock;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Chronometer;
@@ -39,6 +41,7 @@ public class Run_Running_Fragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
     }
 
     @Override
@@ -74,6 +77,13 @@ public class Run_Running_Fragment extends Fragment {
         }
 
         return view;
+    }
+
+    @Override
+    public void onPrepareOptionsMenu(@NonNull Menu menu) {
+        menu.findItem(R.id.menu_run_panel).setVisible(false); //Hides side panel opener
+
+        super.onPrepareOptionsMenu(menu);
     }
 
     //Dist is either measured in kilometers or miles

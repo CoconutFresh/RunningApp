@@ -67,8 +67,9 @@ public class Run_Finish_Fragment extends Fragment implements View.OnClickListene
 
     @Override
     public void onPrepareOptionsMenu(@NonNull Menu menu) {
-        menu.findItem(R.id.menu_delete).setVisible(true);
-        ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        menu.findItem(R.id.menu_delete).setVisible(true); //Shows trashcan
+        menu.findItem(R.id.menu_run_panel).setVisible(false); //Hides side panel
+        //((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true); //Shows back button
 
         super.onPrepareOptionsMenu(menu);
     }

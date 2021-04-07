@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+
+    <item android:title="Type" >
+        <menu>
+            <group android:checkableBehavior="single">
+                <item
+                    android:id="@+id/nav_run"
+                    android:icon="@drawable/ic_run"
+                    android:title="Run" />
+                <item
+                    android:id="@+id/nav_walk"
+                    android:icon="@drawable/ic_walk"
+                    android:title="Walk" />
+                <item
+                    android:id="@+id/nav_hike"
+                    android:icon="@drawable/ic_hike"
+                    android:title="Hike" />
+                <item
+                    android:id="@+id/nav_bike"
+                    android:icon="@drawable/ic_bike"
+                    android:title="Bike" />
+            </group>
+        </menu>
+
+    </item>
+
+    <item android:title="Options">
+        <menu>
+            <item
+                android:id="@+id/test1"
+                android:title="test1" />
+            <item
+                android:id="@+id/test2"
+                android:title="test2" />
+        </menu>
+    </item>
+
+</menu>
