@@ -47,4 +47,8 @@
     <!-- Service Descriptions -->
     <string name="service_desc">Service for tracking location</string>
 
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
 </resources>

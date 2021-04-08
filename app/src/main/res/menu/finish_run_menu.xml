@@ -11,14 +11,6 @@
             android:visible="false"
             android:orderInCategory="2"
             app:showAsAction="always"/>
-
-        <item
-            android:title="Back"
-            android:id="@+id/menu_run_panel"
-            android:icon="@drawable/ic_run_panel"
-            android:visible="false"
-            android:orderInCategory="1"
-            app:showAsAction="always"/>
     </group>
 
 

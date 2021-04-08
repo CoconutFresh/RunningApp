@@ -79,12 +79,12 @@ public class Run_Running_Fragment extends Fragment {
         return view;
     }
 
-    @Override
+/*    @Override
     public void onPrepareOptionsMenu(@NonNull Menu menu) {
         menu.findItem(R.id.menu_run_panel).setVisible(false); //Hides side panel opener
 
         super.onPrepareOptionsMenu(menu);
-    }
+    }*/
 
     //Dist is either measured in kilometers or miles
     public static void updateDistance(float totalDist) {

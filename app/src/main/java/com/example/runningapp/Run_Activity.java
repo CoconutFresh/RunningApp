@@ -2,8 +2,10 @@ package com.example.runningapp;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -108,19 +110,12 @@ public class Run_Activity extends AppCompatActivity implements OnMapReadyCallbac
         setContentView(R.layout.activity_maps); //Connects activity to layout layer
 
         startService(); //Starts location service
+        setNavDrawer(); //Sets up navigation drawer and toolbar
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-
-        NavigationView navView = findViewById(R.id.nav_view);
-        navView.setCheckedItem(R.id.nav_run);
-        navView.setNavigationItemSelectedListener(this);
-
-        drawer = findViewById(R.id.drawer_layout);
-
-        enableLocation(); //Checks for permissions
 
         //Initialize fragments
         fragmentManager(R.id.maps_rl_fragment, initializeRunFragment);
@@ -184,12 +179,25 @@ public class Run_Activity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
+    private void setNavDrawer() {
+        NavigationView navView = findViewById(R.id.nav_view);
+        navView.setCheckedItem(R.id.nav_run);
+        navView.setNavigationItemSelectedListener(this);
+
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        drawer = findViewById(R.id.drawer_layout);
+
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar,
+                R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.addDrawerListener(toggle);
+        toggle.syncState();
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.finish_run_menu, menu);
-        //getSupportActionBar().setDisplayHomeAsUpEnabled(false); //Hides back button
-        menu.findItem(R.id.menu_run_panel).setVisible(true);
 
         return super.onCreateOptionsMenu(menu);
     }
@@ -198,17 +206,6 @@ public class Run_Activity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.menu_run_panel:
-                /*fragmentManager(R.id.maps_rl_fragment, runningFragment);
-                viewChanger(FULLSCREEN);
-                viewButton(PRESENT_B);*/
-                if(drawer.isDrawerOpen(GravityCompat.START)) {
-                    drawer.closeDrawer(GravityCompat.START);
-                }
-                else {
-                    drawer.openDrawer(GravityCompat.START);
-                }
-                return true;
             case R.id.menu_delete:
                 new AlertDialog.Builder(this)
                         .setTitle("Discard Run")
@@ -383,7 +380,7 @@ public class Run_Activity extends AppCompatActivity implements OnMapReadyCallbac
     //Listeners for button fragments
     @Override
     public void onStartPressed(boolean startPressed) { //start fragment
-        drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED); //Disables the ability to open the side panel
+        //drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED); //Disables the ability to open the side panel
         trackerService.setIsRunning(startPressed);
         viewChanger(FULLSCREEN);
         fragmentManager(R.id.maps_rl_fragment, runningFragment);

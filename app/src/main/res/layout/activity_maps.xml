@@ -19,14 +19,14 @@
         android:weightSum="8"
         android:animateLayoutChanges="true">
 
-        <!--<androidx.appcompat.widget.Toolbar
+        <androidx.appcompat.widget.Toolbar
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="@color/design_default_color_primary"
+            android:background="@color/green_light"
             android:id="@+id/toolbar"
             android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
             map:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-            android:elevation="4dp" />-->
+            android:elevation="4dp" />
 
         <fragment
             android:id="@+id/map"
