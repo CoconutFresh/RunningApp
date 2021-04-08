@@ -211,11 +211,15 @@ public class Run_Tracker_Service extends Service implements LocationListener{
 
     //Terminates handlers, location manager, and notification banner
     public void stopTracking() {
-        handlerThread.quit();
-        handlerThread = null;
-        locationManager.removeUpdates(this);
-        locationManager = null;
+        if(handlerThread != null) {
+            handlerThread.quit();
+            handlerThread = null;
+        }
 
+        if(locationManager != null) {
+            locationManager.removeUpdates(this);
+            locationManager = null;
+        }
         //Kills Notification
         stopForeground(true);
     }

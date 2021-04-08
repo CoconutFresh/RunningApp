@@ -89,26 +89,10 @@ public class Run_Activity extends AppCompatActivity implements OnMapReadyCallbac
     private boolean discardFlag = false;
 
     //test
-    String mode = "ERROR";
+    String mode = "ERROR"; //TODO: This works
+
     //test
     private DrawerLayout drawer;
-
-    private ServiceConnection serviceConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            Log.d(TAG, "OnServiceConnnected: connected to service");
-            Run_Tracker_Service.LocalBinder binder = (Run_Tracker_Service.LocalBinder) service;
-            trackerService = binder.getService();
-            Run_Tracker_Service.setCallbacks(Run_Activity.this);
-            isBound = true;
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            Log.d(TAG, "OnServiceConnnected: disconnected to service");
-            isBound = false;
-        }
-    };
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
@@ -136,8 +120,6 @@ public class Run_Activity extends AppCompatActivity implements OnMapReadyCallbac
 
         drawer = findViewById(R.id.drawer_layout);
 
-
-
         enableLocation(); //Checks for permissions
 
         //Initialize fragments
@@ -153,6 +135,24 @@ public class Run_Activity extends AppCompatActivity implements OnMapReadyCallbac
         unitConversion = getUnitConversion(sharedPreferences.getString("distance_units", "Miles"));
     }
 
+    //Tracking Service
+    private ServiceConnection serviceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            Log.d(TAG, "OnServiceConnnected: connected to service");
+            Run_Tracker_Service.LocalBinder binder = (Run_Tracker_Service.LocalBinder) service;
+            trackerService = binder.getService();
+            Run_Tracker_Service.setCallbacks(Run_Activity.this);
+            isBound = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            Log.d(TAG, "OnServiceConnnected: disconnected to service");
+            isBound = false;
+        }
+    };
+
     @RequiresApi(api = Build.VERSION_CODES.O)
     private void startService() {
         Intent intent = new Intent(this, Run_Tracker_Service.class);
@@ -163,14 +163,12 @@ public class Run_Activity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
         if(!discardFlag && isBound && trackerService != null) {
             trackerService.stopTracking();
-
             Intent serviceIntent = new Intent(this, Run_Tracker_Service.class);
             stopService(serviceIntent);
-            //unbindService(serviceConnection); //[NOTE] Unbinding crashes the activity (Not sure if I need to unbind a service that I've already stopped)
         }
+        super.onDestroy();
     }
 
     private float getUnitConversion(String unit) {
@@ -235,6 +233,32 @@ public class Run_Activity extends AppCompatActivity implements OnMapReadyCallbac
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+
+        switch(item.getItemId()) {
+            case R.id.nav_run:
+                Toast.makeText(this, "Selected: Run", Toast.LENGTH_SHORT).show();
+                mode = "Run";
+                break;
+            case R.id.nav_walk:
+                Toast.makeText(this, "Selected: Walk", Toast.LENGTH_SHORT).show();
+                mode = "Walk";
+                break;
+            case R.id.nav_hike:
+                Toast.makeText(this, "Selected: Hike", Toast.LENGTH_SHORT).show();
+                mode = "Hike";
+                break;
+            case R.id.nav_bike:
+                Toast.makeText(this, "Selected: Bike", Toast.LENGTH_SHORT).show();
+                mode = "Bike";
+                break;
+        }
+
+        Run_Initialize_Fragment.setMode(mode);
+        return true;
     }
 
     @Override
@@ -486,7 +510,6 @@ public class Run_Activity extends AppCompatActivity implements OnMapReadyCallbac
                         .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
                                 Run_Running_Fragment.timerReset(); //Resets timer
-
                                 //Switches Activity to home page
                                 startActivity(new Intent(Run_Activity.this, HomePage.class));
                                 finish();
@@ -503,31 +526,4 @@ public class Run_Activity extends AppCompatActivity implements OnMapReadyCallbac
             viewButton(PRESENT_B);
         }
     }
-
-    @Override
-    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-
-        switch(item.getItemId()) {
-            case R.id.nav_run:
-                Toast.makeText(this, "Selected: Run", Toast.LENGTH_SHORT).show();
-                mode = "Run";
-                break;
-            case R.id.nav_walk:
-                Toast.makeText(this, "Selected: Walk", Toast.LENGTH_SHORT).show();
-                mode = "Walk";
-                break;
-            case R.id.nav_hike:
-                Toast.makeText(this, "Selected: Hike", Toast.LENGTH_SHORT).show();
-                mode = "Hike";
-                break;
-            case R.id.nav_bike:
-                Toast.makeText(this, "Selected: Bike", Toast.LENGTH_SHORT).show();
-                mode = "Bike";
-                break;
-        }
-
-        Run_Initialize_Fragment.setMode(mode);
-        return true;
-    }
-
 }
