@@ -69,7 +69,7 @@ public class Run_Activity extends AppCompatActivity implements OnMapReadyCallbac
 
     float totalDist = 0; //In km for now
     float unitConversion; //Conversion factor for miles and kilometers
-    String unit = "error";
+    String unit = "ERROR";
 
     //Related to changing the UI elements the user can see
     RelativeLayout maps_rl_fragment; //Fragment pertaining to the current data
@@ -127,7 +127,7 @@ public class Run_Activity extends AppCompatActivity implements OnMapReadyCallbac
          */
 
         SharedPreferences sharedPreferences =  PreferenceManager.getDefaultSharedPreferences(this);
-        unitConversion = getUnitConversion(sharedPreferences.getString("distance_units", "Miles"));
+        unitConversion = getUnitConversion(sharedPreferences.getString(getString(R.string.pref_run_distUnit), "Miles"));
     }
 
     //Tracking Service
@@ -251,6 +251,13 @@ public class Run_Activity extends AppCompatActivity implements OnMapReadyCallbac
             case R.id.nav_bike:
                 Toast.makeText(this, "Selected: Bike", Toast.LENGTH_SHORT).show();
                 mode = "Bike";
+                break;
+            case R.id.nav_segment:
+                Toast.makeText(this, "Selected: segment", Toast.LENGTH_SHORT).show();
+
+                break;
+            case R.id.nav_duration:
+                Toast.makeText(this, "Selected: interval", Toast.LENGTH_SHORT).show();
                 break;
         }
 
@@ -482,6 +489,8 @@ public class Run_Activity extends AppCompatActivity implements OnMapReadyCallbac
     //Determines the actions of the back button
     @Override
     public void onBackPressed() {
+
+        trackerService.setFlag(false);
 
         if(drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);

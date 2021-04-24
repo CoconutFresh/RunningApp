@@ -38,8 +38,18 @@
     </string-array>
 
     <!-- Preference Titles -->
-    <string name="run_settings">Run Details</string>
     <string name="general_settings">General</string>
+    <string name="pref_gen_nightMode">pref_gen_nightMode</string>
+
+    <string name="run_settings">Run Settings</string>
+    <string name="distUnit">Distance Unit</string>
+    <string name="pref_run_distUnit">pref_run_distUnit</string>
+    <string name="segment_length">Segment Length</string>
+    <string name="pref_segLength">pref_segLength</string>
+    <string name="intervalLength">Sprint Interval Length</string>
+    <string name="pref_intervalLength">pref_intervalLength</string>
+    <string name="pref_segSwitch">pref_segSwitch</string>
+    <string name="title_segSwitch">Turn on Segments</string>
 
     <!-- Default Value -->
     <string name="default_unit">Miles</string>

@@ -30,12 +30,11 @@
     <item android:title="Options">
         <menu>
             <item
-                android:id="@+id/test1"
-                android:title="test1" />
+                android:id="@+id/nav_segment"
+                android:title="Segment Length"/>
             <item
-                android:id="@+id/test2"
-                android:title="test2" />
+                android:id="@+id/nav_duration"
+                android:title="Sprint Duration" />
         </menu>
     </item>
-
 </menu>

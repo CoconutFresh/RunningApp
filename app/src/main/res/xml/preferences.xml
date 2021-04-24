@@ -5,7 +5,7 @@
 
         <SwitchPreference
             android:defaultValue="false"
-            android:key="night_mode"
+            android:key="pref_gen_nightMode"
             android:title="Night Mode" />
 
 
@@ -18,8 +18,24 @@
             android:defaultValue="@string/default_unit"
             android:entries="@array/unit_entries"
             android:entryValues="@array/unit_entries"
-            android:key="distance_units"
-            android:title="Distance Units" />
+            android:key="@string/pref_run_distUnit"
+            android:title="@string/distUnit" />
+
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="@string/pref_segSwitch"
+            android:title="@string/title_segSwitch" />
+
+        <EditTextPreference
+            android:key="@string/pref_segLength"
+            android:title="@string/segment_length"
+            android:dependency="@string/pref_segSwitch"/>
+
+        <EditTextPreference
+            android:key="@string/pref_intervalLength"
+            android:title="@string/intervalLength"
+            />
+
     </PreferenceCategory>
 
 </PreferenceScreen>

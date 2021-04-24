@@ -56,8 +56,11 @@ public class Run_Tracker_Service extends Service implements LocationListener{
     Location pastLoc;
     float unitConversion = -1;
 
-    //Flags
+    //Run Logic Flags
     boolean isRunning = false, initialState = true, pause = false; //Flags that make up the behaviour of the GPS tracking
+
+    //Makes sure thread doesn't run when activity is closed
+    private boolean threadRunning;
 
 /*    //TEST
     int testCounter = 0;
@@ -100,7 +103,7 @@ public class Run_Tracker_Service extends Service implements LocationListener{
         //Managing the handler thread
         handlerThread.start();
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-
+        threadRunning = true;
         initPolyline();
 
         //Permission check (We can't make the user change permissions in a service, we have that and an additional check in the activity
@@ -109,7 +112,7 @@ public class Run_Tracker_Service extends Service implements LocationListener{
         }
     }
 
-/*    private void test() {
+    /*    private void test() {
         final Runnable runnable = new Runnable() {
             @Override
             public void run() {
@@ -161,36 +164,39 @@ public class Run_Tracker_Service extends Service implements LocationListener{
         mainHandler.post(new Runnable() {
             @Override
             public void run() {
-                LatLng curLoc = new LatLng(location.getLatitude(), location.getLongitude());
-                callback.getLocation(location);
 
-                //In charge of how map is displayed to the runner (Running vs. Not Running)
-                if (!isRunning && !initialState) { //Map shows users location before run starts
-                    callback.animateCamera(curLoc);
-                    pastLoc = location;
+                if (threadRunning) {
+                    LatLng curLoc = new LatLng(location.getLatitude(), location.getLongitude());
+                    callback.getLocation(location);
+
+                    //In charge of how map is displayed to the runner (Running vs. Not Running)
+                    if (!isRunning && !initialState) { //Map shows users location before run starts
+                        callback.animateCamera(curLoc);
+                        pastLoc = location;
+                    } else if (isRunning && !initialState && !pause) { //User clicks start run
+
+                        float dist = pastLoc.distanceTo(location) / unitConversion; //converts it from meters to kilometers
+                        pastLoc = location; //Updates the past location to the current location
+                        totalDist += dist; //Adds to the total distance ran
+                        //totalDist += 0.025; //For testing purposes
+
+                        runRouteOptions.add(curLoc);
+
+                        //Callbacks for Run_Activity to do work
+                        callback.updateDistance(totalDist);
+                        callback.updateTrail();
+                        callback.animateCamera(curLoc);
+                        callback.updateNotification();
+                    } else if (pause) {
+                        pastLoc = location;
+                    } else { //Initial map preparations before the user starts run
+                        callback.initialState(curLoc);
+                        pastLoc = location;
+                        initialState = false;
+                    }
                 }
-                else if (isRunning && !initialState && !pause) { //User clicks start run
-
-                    float dist = pastLoc.distanceTo(location) / unitConversion; //converts it from meters to kilometers
-                    pastLoc = location; //Updates the past location to the current location
-                    totalDist += dist; //Adds to the total distance ran
-                    //totalDist += 0.025; //For testing purposes
-
-                    runRouteOptions.add(curLoc);
-
-                    //Callbacks for Run_Activity to do work
-                    callback.updateDistance(totalDist);
-                    callback.updateTrail();
-                    callback.animateCamera(curLoc);
-                    callback.updateNotification();
-                }
-                else if (pause) {
-                    pastLoc = location;
-                }
-                else { //Initial map preparations before the user starts run
-                    callback.initialState(curLoc);
-                    pastLoc = location;
-                    initialState = false;
+                else {
+                    notificationManager.cancelAll();
                 }
             }
         });
@@ -234,6 +240,10 @@ public class Run_Tracker_Service extends Service implements LocationListener{
 
     public void setIsRunning(boolean flag) {
         isRunning = flag;
+    }
+
+    public void setFlag(boolean flag) {
+        threadRunning = flag;
     }
 
 }
