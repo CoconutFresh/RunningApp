@@ -75,6 +75,7 @@ import com.google.firebase.database.FirebaseDatabase;
         String username = usernameField.getText().toString().trim();
         String email = emailField.getText().toString().trim();
         String password = passwordField.getText().toString().trim();
+        int level = 0;
 
         if(fName.isEmpty()) {
             fNameField.setError("First Name is required!");
@@ -130,7 +131,7 @@ import com.google.firebase.database.FirebaseDatabase;
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if(task.isSuccessful()) {
-                            User user = new User(fName, lName, birthday, username, email);
+                            User user = new User(fName, lName, birthday, username, email, level);
 
                             FirebaseDatabase.getInstance().getReference("Users")
                                     .child(FirebaseAuth.getInstance().getCurrentUser().getUid())

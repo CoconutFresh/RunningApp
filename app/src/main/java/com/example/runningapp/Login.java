@@ -99,7 +99,7 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
                 startActivity(new Intent(this, ForgotPassword.class));
                 break;
             case R.id.lg_button:
-                //login();
+                login();
                 startActivity(new Intent(Login.this, HomePage.class));
                 break;
             case R.id.google_button:
