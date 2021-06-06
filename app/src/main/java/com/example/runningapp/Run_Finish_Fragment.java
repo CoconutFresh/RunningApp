@@ -12,11 +12,27 @@ import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+
 import java.text.DecimalFormat;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Run_Finish_Fragment extends Fragment implements View.OnClickListener{
+    private FirebaseUser user;
+    private String key, title, desc;
+    private EditText titleField, descField;
+
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     TextView tv_time, tv_dist, tv_pace;
     Run_Activity activity;
@@ -62,6 +78,10 @@ public class Run_Finish_Fragment extends Fragment implements View.OnClickListene
         tv_dist.setText(dfRound.format(session.getTotalDist()));
         tv_pace.setText(session.getFormatPace());
 
+        // Title and Description fields
+        titleField = (EditText) view.findViewById(R.id.edt_runTitle);
+        descField = (EditText) view.findViewById(R.id.edt_runDesc);
+
         return view;
     }
 
@@ -75,10 +95,48 @@ public class Run_Finish_Fragment extends Fragment implements View.OnClickListene
 
     @Override
     public void onClick(View v) {
+        user = FirebaseAuth.getInstance().getCurrentUser();
+        // prevents break if some fucky things happen with user auth
+        if(user != null) { key = user.getUid(); }
+
+        // Setting default placeholder text
+        if(titleField.getText().length() == 0) {
+            title = "Untitled Activity";
+        }
+        else {
+            title = titleField.getText().toString();
+        }
+        if(descField.getText().length() == 0) {
+            desc = "No Description";
+        }
+        else {
+            desc = descField.getText().toString();
+        }
+        
         switch (v.getId()) {
             case R.id.fbt_saveRun:
-                //TODO: Use session object's data here
-                Log.d(TAG, "onClick: TEST!");
+                Map<String, Object> data = new HashMap<>();
+                data.put("key", key);
+                data.put("title", title);
+                data.put("desc", desc);
+                data.put("time", tv_time.getText().toString());
+                data.put("dist", tv_dist.getText().toString());
+                data.put("pace", tv_pace.getText().toString());
+
+                db.collection("runData")
+                        .add(data)
+                        .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                            @Override
+                            public void onSuccess(DocumentReference documentReference) {
+                                Log.d(TAG, "DocumentSnapshot added with ID: " + documentReference.getId());
+                            }
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Log.w(TAG, "Error adding document", e);
+                            }
+                        });
                 break;
             default:
                 Log.d(TAG, "onClick: ERROR! onClick reached default!");
